@@ -1,0 +1,1 @@
+﻿public enum PlaySide { Top, Bottom };

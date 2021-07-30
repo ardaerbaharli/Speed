@@ -86,7 +86,7 @@ Canvas:
   m_Enabled: 1
   serializedVersion: 3
   m_RenderMode: 2
-  m_Camera: {fileID: 7890277482761956037, guid: c6fb587dddda89a428f8d98a35ede43c,
+  m_Camera: {fileID: 5945503082081550224, guid: 79b146d36f3fd9041ae660442bf7324b,
     type: 3}
   m_PlaneDistance: 100
   m_PixelPerfect: 0
