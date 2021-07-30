@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
@@ -21,6 +22,8 @@ public class GameControl : MonoBehaviour
     public static GameControl instance;
 
     private Player bottom, top;
+
+    private List<Card> lastSpeed = new List<Card>();
 
     private void Awake()
     {
@@ -64,11 +67,11 @@ public class GameControl : MonoBehaviour
 
             var card = Instantiate(cardPrefab);
             card.AddComponent<Card>();
-            card.name = drawedCard.Name;
+            card.name = drawedCard.CardName;
             card.GetComponent<Image>().sprite = Resources.Load<Sprite>(card.name);
 
             card.GetComponent<Card>().ID = drawedCard.ID;
-            card.GetComponent<Card>().Name = drawedCard.Name;
+            card.GetComponent<Card>().CardName = drawedCard.CardName;
             card.GetComponent<Card>().Suit = drawedCard.Suit;
             card.GetComponent<Card>().Value = drawedCard.Value;
 
@@ -97,11 +100,11 @@ public class GameControl : MonoBehaviour
 
             var card = Instantiate(cardPrefab);
             card.AddComponent<Card>();
-            card.name = drawedCard.Name;
+            card.name = drawedCard.CardName;
             card.GetComponent<Image>().sprite = Resources.Load<Sprite>(card.name);
 
             card.GetComponent<Card>().ID = drawedCard.ID;
-            card.GetComponent<Card>().Name = drawedCard.Name;
+            card.GetComponent<Card>().CardName = drawedCard.CardName;
             card.GetComponent<Card>().Suit = drawedCard.Suit;
             card.GetComponent<Card>().Value = drawedCard.Value;
 
@@ -124,11 +127,11 @@ public class GameControl : MonoBehaviour
 
             var card = Instantiate(cardPrefab);
             card.AddComponent<Card>();
-            card.name = drawedCard.Name;
+            card.name = drawedCard.CardName;
             card.GetComponent<Image>().sprite = Resources.Load<Sprite>(card.name);
 
             card.GetComponent<Card>().ID = drawedCard.ID;
-            card.GetComponent<Card>().Name = drawedCard.Name;
+            card.GetComponent<Card>().CardName = drawedCard.CardName;
             card.GetComponent<Card>().Suit = drawedCard.Suit;
             card.GetComponent<Card>().Value = drawedCard.Value;
 
@@ -158,21 +161,36 @@ public class GameControl : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Checks if the both middle cards have same values.
-    /// </summary>
-    /// <returns></returns>
+
     public bool CheckIfSpeedIsValid()
     {
-        var leftCard = leftGroundCardHolder.transform.GetChild(leftGroundCardHolder.transform.childCount - 1).transform;
-        int leftCardValue = leftCard.GetComponent<Card>().Value;
+        var leftCard_go = leftGroundCardHolder.transform.GetChild(leftGroundCardHolder.transform.childCount - 1).transform;
+        var leftCard = leftCard_go.GetComponent<Card>();
+        int leftCardValue = leftCard.Value;
 
-        var rightCard = rightGroundCardHolder.transform.GetChild(rightGroundCardHolder.transform.childCount - 1).transform;
-        int rightCardValue = rightCard.GetComponent<Card>().Value;
+        var rightCard_go = rightGroundCardHolder.transform.GetChild(rightGroundCardHolder.transform.childCount - 1).transform;
+        var rightCard = rightCard_go.GetComponent<Card>();
+        int rightCardValue = rightCard.Value;
 
-        if (leftCardValue == rightCardValue)
-            return true;
+        if (IsThisNewSpeed(leftCard, rightCard))
+        {
+            if (leftCardValue == rightCardValue)
+                return true;
+        }
         return false;
+    }
+
+    private bool IsThisNewSpeed(Card leftCard, Card rightCard)
+    {
+        if (lastSpeed.Count == 2)
+        {
+            var oldSpeedLeftCard = lastSpeed[0];
+            var oldSpeedRightCard = lastSpeed[1];
+
+            if (Card.IsEqual(leftCard, oldSpeedLeftCard) && Card.IsEqual(rightCard, oldSpeedRightCard))
+                return false;
+        }
+        return true;
     }
 
     /// <summary>
@@ -191,6 +209,16 @@ public class GameControl : MonoBehaviour
     /// <param name="toThisPlayer">The player who will take the cards.</param>
     public void SpeedEvent(Player fromThisPlayer, Player toThisPlayer)
     {
+        UpdateLastSpeed();
+
         fromThisPlayer.GiveCards(fromThisPlayer, toThisPlayer);
+    }
+
+    private void UpdateLastSpeed()
+    {
+        lastSpeed.Clear();
+
+        lastSpeed.Add(leftGroundCardHolder.transform.GetChild(rightGroundCardHolder.transform.childCount - 1).transform.GetComponent<Card>());
+        lastSpeed.Add(rightGroundCardHolder.transform.GetChild(rightGroundCardHolder.transform.childCount - 1).transform.GetComponent<Card>());
     }
 }

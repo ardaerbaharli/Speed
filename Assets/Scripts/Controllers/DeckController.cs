@@ -50,7 +50,7 @@ public class DeckController : MonoBehaviour
                     break;
             }
 
-            card.Name = $"{card.Suit}{card.Value}";
+            card.CardName = $"{card.Suit}{card.Value}";
 
             deck.Add(card);
         }
