@@ -55,7 +55,6 @@ public class AnimationController : MonoBehaviour
     public static IEnumerator SlideTo(List<GameObject> cards, Player toWho)
     {
         Transform targetHand = toWho.playSide == PlaySide.Bottom ? GameControl.instance.bottomHand.transform : GameControl.instance.topHand.transform;
-
         var parent = cards.First().transform.parent;
         int childCount = cards.First().transform.parent.childCount;
 
@@ -63,9 +62,13 @@ public class AnimationController : MonoBehaviour
         for (int i = 0; i < pos.Count; i++)
         {
             instance.StartCoroutine(Slide(cards[i], targetHand.transform, pos[i], GameSettings.slidingSpeed));
+            float rAngle;
+            if (toWho.playSide == PlaySide.Top) rAngle = 180f;
+            else rAngle = 0;
+            instance.StartCoroutine(FlipVertically(cards[i], GameSettings.slidingSpeed, rAngle));
         }
 
-        DestroyDummies();
+   
 
         do
         {
@@ -83,8 +86,6 @@ public class AnimationController : MonoBehaviour
         //    targetParent.transform.GetComponent<VerticalLayoutGroup>().spacing = GameControl.CalculateSpacing(targetParent);
     }
 
-
-
     /// <summary>
     /// Method to create sliding animation
     /// </summary>
@@ -95,27 +96,47 @@ public class AnimationController : MonoBehaviour
     /// <returns></returns>
     private static IEnumerator Slide(GameObject card, Transform targetParent, Vector3 position, float time)
     {
-        card.GetComponent<Card>().IsSliding = true;
-        card.GetComponent<Card>().IsDummy = true;
+        if (!card.GetComponent<Card>().IsSliding)
+        {
+            card.GetComponent<Card>().IsSliding = true;
 
-        card.GetComponent<Canvas>().overrideSorting = true;
-        card.GetComponent<Canvas>().sortingOrder = 2;
+            card.GetComponent<Canvas>().overrideSorting = true;
+            card.GetComponent<Canvas>().sortingOrder = 2;
+
+            float seconds = time;
+            float t = 0f;
+            while (t <= 1.0)
+            {
+                t += Time.deltaTime / seconds;
+                card.transform.position = Vector3.Lerp(card.transform.position, position, Mathf.SmoothStep(0f, 1f, t));
+                yield return null;
+            }
+
+            DestroyDummies();
+            SetParent(card, targetParent);
+
+            card.GetComponent<Card>().IsSliding = false;
+        }
+    }
+
+    public static IEnumerator FlipVertically(GameObject card, float time, float rotateAngle)
+    {
+        var currentRotationAngle = card.GetComponent<RectTransform>().rotation.z;
+        var v = new Vector3(0, 0, rotateAngle);
+        var q = Quaternion.Euler(v);
 
         float seconds = time;
         float t = 0f;
         while (t <= 1.0)
         {
             t += Time.deltaTime / seconds;
-            card.transform.position = Vector3.Lerp(card.transform.position, position, Mathf.SmoothStep(0f, 1f, t));
+            card.GetComponent<RectTransform>().rotation = Quaternion.Lerp(card.GetComponent<RectTransform>().rotation, q, Mathf.SmoothStep(0f, 1f, t));
             yield return null;
         }
-        SetParent(card, targetParent);
     }
-   
+
     public static Vector3 GetPosition(GameObject card, Transform targetParent)
     {
-        card.GetComponent<Card>().IsSliding = true;
-
         var positionDummy = Instantiate(GameControl.instance.cardPrefab, targetParent) as GameObject;
         positionDummy.AddComponent<Card>();
         positionDummy.GetComponent<Card>().IsDummy = true;
@@ -167,7 +188,6 @@ public class AnimationController : MonoBehaviour
         //    parent.GetComponent<VerticalLayoutGroup>().spacing = GameControl.CalculateSpacing(parent); // set the spacing for the panel layout
 
         card.GetComponent<Canvas>().overrideSorting = false;
-        card.GetComponent<Card>().IsSliding = false;
         card.GetComponent<Card>().IsDummy = false;
 
     }

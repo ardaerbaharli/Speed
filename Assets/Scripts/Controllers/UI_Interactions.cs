@@ -22,16 +22,29 @@ public class UI_Interactions : MonoBehaviour
         var clickedButton = EventSystem.current.currentSelectedGameObject;
 
         Player whoClicked = clickedButton.name.Substring("SpeedButton_".Length) == "Top" ? topPlayer : bottomPlayer;
-        if (!whoClicked.IsInCooldown)
+        Player to = whoClicked == topPlayer ? bottomPlayer : topPlayer;
+
+
+        if (gameControl.CheckIfSpeedIsValid())
         {
-            if (gameControl.CheckIfSpeedIsValid())
+            if (!whoClicked.IsInCooldown)
             {
-                Player to = topPlayer;
                 gameControl.SpeedEvent(whoClicked, to);
             }
-            else
-                gameControl.SpeedCooldown(whoClicked);
         }
+        else gameControl.SpeedCooldown(whoClicked);
+
+
+        //if (!whoClicked.IsInCooldown)
+        //{
+        //    if (gameControl.CheckIfSpeedIsValid())
+        //    {
+        //        Player to = topPlayer;
+        //        gameControl.SpeedEvent(whoClicked, to);
+        //    }
+        //    else
+        //        gameControl.SpeedCooldown(whoClicked);
+        //}
     }
     public void DrawMiddleButton()
     {
