@@ -13,10 +13,11 @@ public class DeckController : MonoBehaviour
     }
     public List<Card> CreateADeck()
     {
+        var cardobj = new GameObject();
         var deck = new List<Card>();
         for (int i = 0; i < 52; i++)
         {
-            var card = gameObject.AddComponent<Card>();
+            var card = cardobj.AddComponent<Card>();//gameObject.AddComponent<Card>();
             card.ID = i;
 
             int cardValueIndex = card.ID % 13;
@@ -54,6 +55,7 @@ public class DeckController : MonoBehaviour
 
             deck.Add(card);
         }
+        Destroy(cardobj);
         return deck;
     }
     public Card DrawRandomCard()

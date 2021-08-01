@@ -47,7 +47,7 @@ public class Player : MonoBehaviour
         if (fromThisPlayer.handCards.Count > 0)
         {
             var cards = fromThisPlayer.handCards;
-            StartCoroutine(AnimationController.SlideTo(cards, toThisPlayer));
+            StartCoroutine(AnimationController.SlideToHand(cards, toThisPlayer));
 
             foreach (var card in fromThisPlayer.handCards.ToList())
             {
