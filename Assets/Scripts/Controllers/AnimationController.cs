@@ -123,6 +123,7 @@ public class AnimationController : MonoBehaviour
             posDummies.Add(positionDummy);
         }
 
+        LayoutRebuilder.ForceRebuildLayoutImmediate(targetParent.parent.GetComponent<RectTransform>());
         LayoutRebuilder.ForceRebuildLayoutImmediate(targetParent.GetComponent<RectTransform>());
 
         var positions = new List<Vector3>();
