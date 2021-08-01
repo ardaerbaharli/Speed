@@ -1,15 +1,20 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
+
 public class Card : MonoBehaviour
 {
     public bool IsSliding { get; set; }
     public bool IsDummy { get; set; }
     public string CardName { get; set; }
     public int ID { get; set; }
+    public Player player { get; set; }
     public int Value;
     public string Suit;
-    private void Awake()
+
+    private GameControl gameControl;
+    private void Start()
     {
-        
+        gameControl = FindObjectOfType<GameControl>();
     }
 
     public static bool IsEqual(Card a, Card b)
@@ -23,6 +28,6 @@ public class Card : MonoBehaviour
     }
     public void CardClick()
     {
-        
+        gameControl.CanThisCard(gameObject);
     }
 }
