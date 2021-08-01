@@ -1111,7 +1111,7 @@ PrefabInstance:
     - target: {fileID: 6835372021217954187, guid: d2b697d43e3de6a4fa90a81521df3993,
         type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6835372021217954187, guid: d2b697d43e3de6a4fa90a81521df3993,
         type: 3}
@@ -1121,7 +1121,7 @@ PrefabInstance:
     - target: {fileID: 6835372021217954187, guid: d2b697d43e3de6a4fa90a81521df3993,
         type: 3}
       propertyPath: m_LocalRotation.z
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6835372021217954187, guid: d2b697d43e3de6a4fa90a81521df3993,
         type: 3}
@@ -1141,7 +1141,7 @@ PrefabInstance:
     - target: {fileID: 6835372021217954187, guid: d2b697d43e3de6a4fa90a81521df3993,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
+      value: 180
       objectReference: {fileID: 0}
     - target: {fileID: 6835372021217954187, guid: d2b697d43e3de6a4fa90a81521df3993,
         type: 3}
@@ -1161,7 +1161,7 @@ PrefabInstance:
     - target: {fileID: 6835372021217954187, guid: d2b697d43e3de6a4fa90a81521df3993,
         type: 3}
       propertyPath: m_SizeDelta.x
-      value: 0
+      value: 0.00061035156
       objectReference: {fileID: 0}
     - target: {fileID: 6835372021217954187, guid: d2b697d43e3de6a4fa90a81521df3993,
         type: 3}
@@ -1794,6 +1794,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Canvas
       objectReference: {fileID: 0}
+    - target: {fileID: 1719971254958757469, guid: c5f33ac1052592546a6dad0e4a6f766c,
+        type: 3}
+      propertyPath: m_TagString
+      value: Canvas
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c5f33ac1052592546a6dad0e4a6f766c, type: 3}
 --- !u!1001 &3585429055460011619
@@ -2282,7 +2287,8 @@ PrefabInstance:
       propertyPath: m_Name
       value: LeftGroundCardHolder
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 596281677361079930, guid: c2a071a60473db740b5c64fb1e817610, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: c2a071a60473db740b5c64fb1e817610, type: 3}
 --- !u!1001 &5945503081981560815
 PrefabInstance:
@@ -2364,6 +2370,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Spacing
       value: -200
+      objectReference: {fileID: 0}
+    - target: {fileID: 6835372021217954184, guid: d2b697d43e3de6a4fa90a81521df3993,
+        type: 3}
+      propertyPath: m_ChildAlignment
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 6835372021217954186, guid: d2b697d43e3de6a4fa90a81521df3993,
         type: 3}
