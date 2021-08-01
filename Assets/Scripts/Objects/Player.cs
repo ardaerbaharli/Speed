@@ -4,13 +4,13 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    public PlaySide playSide;
+    public PlaySide playSide { get; set; }
+    public bool IsInCooldown { get; set; }
+    public float CooldownTime { get; set; }
+    public bool DrawMiddle { get; set; }
 
     public List<GameObject> handCards;
     public List<GameObject> playerDeck;
-    public bool IsInCooldown { get; set; }
-    public float CooldownTime { get; set; }
-
     private void Awake()
     {
         handCards = new List<GameObject>();

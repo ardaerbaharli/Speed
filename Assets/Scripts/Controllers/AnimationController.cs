@@ -11,47 +11,7 @@ public class AnimationController : MonoBehaviour
     {
         instance = this;
     }
-    /// <summary>
-    /// Slide the given card to given player.
-    /// </summary>
-    /// <param name="card">Card to slide</param>
-    /// <param name="toWho">Player to slide</param>
-    /// <returns></returns>
-    public static IEnumerator SlideTo(GameObject card, Player toWho)
-    {
-        Transform targetHand = toWho.playSide == PlaySide.Bottom ? GameControl.instance.bottomHand.transform : GameControl.instance.topHand.transform;
 
-        var parent = card.transform.parent;
-        int childCount = card.transform.parent.childCount;
-
-        var pos = GetPosition(card, targetHand);
-
-        instance.StartCoroutine(Slide(card, targetHand.transform, pos, GameSettings.slidingSpeed));
-
-        do
-        {
-            yield return null;
-
-        } while (parent.childCount != childCount - 1);
-
-        DestroyDummies();
-
-
-        while (parent.name == card.transform.parent.name)
-            yield return null;
-
-
-        //if (targetParent.name.Contains("Panel"))
-        //    targetParent.transform.GetComponent<VerticalLayoutGroup>().spacing = GameControl.CalculateSpacing(targetParent);
-    }
-
-
-    /// <summary>
-    /// Slide the given cards to given player.
-    /// </summary>
-    /// <param name="cards">Cards to slide</param>
-    /// <param name="toWho">Player to slide</param>
-    /// <returns></returns>
     public static IEnumerator SlideTo(List<GameObject> cards, Player toWho)
     {
         Transform targetHand = toWho.playSide == PlaySide.Bottom ? GameControl.instance.bottomHand.transform : GameControl.instance.topHand.transform;
@@ -68,32 +28,29 @@ public class AnimationController : MonoBehaviour
             instance.StartCoroutine(FlipVertically(cards[i], GameSettings.slidingSpeed, rAngle));
         }
 
-   
-
         do
         {
             yield return null;
 
         } while (parent.childCount != childCount - cards.Count);
-
-
-
-        //while (parent.name == card.transform.parent.name)
-        //    yield return null;
-
-
-        //if (targetParent.name.Contains("Panel"))
-        //    targetParent.transform.GetComponent<VerticalLayoutGroup>().spacing = GameControl.CalculateSpacing(targetParent);
     }
 
-    /// <summary>
-    /// Method to create sliding animation
-    /// </summary>
-    /// <param name="card">Sliding card</param>
-    /// <param name="targetParent">New parent for the given card</param>
-    /// <param name="position">Position that the card will have at the end of the sliding animation</param>
-    /// <param name="time">Time that sliding animation will take</param>
-    /// <returns></returns>
+    public static IEnumerator SlideTo(GameObject card, GameObject target)
+    {
+        var parent = card.transform.parent;
+        var childCount = parent.childCount;
+
+        var pos = GetPositions(target.transform,1).First();
+        instance.StartCoroutine(Slide(card, target.transform, pos, GameSettings.slidingSpeed));
+
+        do
+        {
+            yield return null;
+
+        } while (parent.childCount != childCount - 1);
+    }
+
+
     private static IEnumerator Slide(GameObject card, Transform targetParent, Vector3 position, float time)
     {
         if (!card.GetComponent<Card>().IsSliding)
@@ -112,16 +69,18 @@ public class AnimationController : MonoBehaviour
                 yield return null;
             }
 
-            DestroyDummies();
-            SetParent(card, targetParent);
 
+            DestroyDummies();
+
+            card.transform.SetParent(targetParent);
+
+            card.GetComponent<Canvas>().overrideSorting = false;
             card.GetComponent<Card>().IsSliding = false;
         }
     }
 
     public static IEnumerator FlipVertically(GameObject card, float time, float rotateAngle)
     {
-        var currentRotationAngle = card.GetComponent<RectTransform>().rotation.z;
         var v = new Vector3(0, 0, rotateAngle);
         var q = Quaternion.Euler(v);
 
@@ -135,7 +94,7 @@ public class AnimationController : MonoBehaviour
         }
     }
 
-    public static Vector3 GetPosition(GameObject card, Transform targetParent)
+    public static Vector3 GetPosition(Transform targetParent)
     {
         var positionDummy = Instantiate(GameControl.instance.cardPrefab, targetParent) as GameObject;
         positionDummy.AddComponent<Card>();
@@ -143,12 +102,10 @@ public class AnimationController : MonoBehaviour
         positionDummy.tag = "dummy";
         positionDummy.GetComponent<Image>().color = new Color(0, 0, 0, 0);
 
-        //if (targetParent.parent.name.Contains("Panel"))
-        //    targetParent.transform.GetComponent<VerticalLayoutGroup>().spacing = GameControl.CalculateSpacing(targetParent, 1);
-
         LayoutRebuilder.ForceRebuildLayoutImmediate(targetParent.GetComponent<RectTransform>());
 
         var pos = positionDummy.transform.position;
+        Debug.Log(positionDummy.transform.parent.transform.position);
         return pos;
     }
 
@@ -166,9 +123,6 @@ public class AnimationController : MonoBehaviour
             posDummies.Add(positionDummy);
         }
 
-        //if (targetParent.parent.name.Contains("Panel"))
-        //    targetParent.transform.GetComponent<VerticalLayoutGroup>().spacing = GameControl.CalculateSpacing(targetParent, 1);
-
         LayoutRebuilder.ForceRebuildLayoutImmediate(targetParent.GetComponent<RectTransform>());
 
         var positions = new List<Vector3>();
@@ -179,18 +133,7 @@ public class AnimationController : MonoBehaviour
         }
         return positions;
     }
-    private static void SetParent(GameObject card, Transform targetParent)
-    {
-        var parent = card.transform.parent;
-        card.transform.SetParent(targetParent);
 
-        //if (parent.name.Contains("Panel"))
-        //    parent.GetComponent<VerticalLayoutGroup>().spacing = GameControl.CalculateSpacing(parent); // set the spacing for the panel layout
-
-        card.GetComponent<Canvas>().overrideSorting = false;
-        card.GetComponent<Card>().IsDummy = false;
-
-    }
     private static void DestroyDummies()
     {
         var dummies = GameObject.FindGameObjectsWithTag("dummy");

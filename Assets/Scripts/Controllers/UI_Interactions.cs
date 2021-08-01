@@ -11,10 +11,8 @@ public class UI_Interactions : MonoBehaviour
     {
         gameControl = gameObject.GetComponent<GameControl>();
 
-        bottomPlayer = gameObject.AddComponent<Player>();
-        bottomPlayer.playSide = PlaySide.Bottom;
-        topPlayer = gameObject.AddComponent<Player>();
-        topPlayer.playSide = PlaySide.Top;
+        bottomPlayer = gameControl.bottomPlayer;
+        topPlayer = gameControl.topPlayer;
     }
 
     public void SpeedButton()
@@ -28,26 +26,21 @@ public class UI_Interactions : MonoBehaviour
         if (gameControl.CheckIfSpeedIsValid())
         {
             if (!whoClicked.IsInCooldown)
-            {
                 gameControl.SpeedEvent(whoClicked, to);
-            }
         }
         else gameControl.SpeedCooldown(whoClicked);
-
-
-        //if (!whoClicked.IsInCooldown)
-        //{
-        //    if (gameControl.CheckIfSpeedIsValid())
-        //    {
-        //        Player to = topPlayer;
-        //        gameControl.SpeedEvent(whoClicked, to);
-        //    }
-        //    else
-        //        gameControl.SpeedCooldown(whoClicked);
-        //}
     }
+
     public void DrawMiddleButton()
     {
+        var clickedButton = EventSystem.current.currentSelectedGameObject;
+        var player = clickedButton.name.Substring("DrawMiddleButton_".Length) == "Top" ? topPlayer : bottomPlayer;
 
+        gameControl.twoMan.SetTrue(player);
+        if (gameControl.twoMan.IsBothPlayersAccepted())
+        {
+            gameControl.twoMan.ResetKeys();
+            gameControl.DealMiddleCards();
+        }
     }
 }

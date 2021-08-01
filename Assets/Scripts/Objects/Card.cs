@@ -1,6 +1,4 @@
-﻿using System;
-using UnityEngine;
-
+﻿using UnityEngine;
 public class Card : MonoBehaviour
 {
     public bool IsSliding { get; set; }
@@ -9,14 +7,22 @@ public class Card : MonoBehaviour
     public int ID { get; set; }
     public int Value;
     public string Suit;
+    private void Awake()
+    {
+        
+    }
 
     public static bool IsEqual(Card a, Card b)
     {
-        if (a.CardName == b.CardName && 
+        if (a.CardName == b.CardName &&
             a.Value == b.Value &&
             a.Suit == b.Suit &&
             a.ID == b.ID)
             return true;
         else return false;
+    }
+    public void CardClick()
+    {
+        
     }
 }

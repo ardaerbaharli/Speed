@@ -21,41 +21,39 @@ public class GameControl : MonoBehaviour
     public GameObject cardPrefab;
     public static GameControl instance;
 
-    private Player bottom, top;
+    public TwoPlayerKey twoMan;
+
+    public Player bottomPlayer, topPlayer;
 
     private List<Card> lastSpeed = new List<Card>();
 
     private void Awake()
     {
         instance = this;
+
+        bottomPlayer = gameObject.AddComponent<Player>();
+        bottomPlayer.playSide = PlaySide.Bottom;
+        topPlayer = gameObject.AddComponent<Player>();
+        topPlayer.playSide = PlaySide.Top;
+
+        twoMan = gameObject.AddComponent<TwoPlayerKey>();
+        twoMan.SetPlayers(bottomPlayer, topPlayer);
     }
 
     private void Start()
     {
-        var players = gameObject.GetComponents<Player>();
-
-        if (players[0].playSide == PlaySide.Bottom)
-        {
-            bottom = players[0];
-            top = players[1];
-        }
-        else
-        {
-            top = players[0];
-            bottom = players[1];
-        }
-
         DeckController.instance.CreateADeck();
 
-        DealMiddle();
+        DealSideCards();
         DealPlayerDecks();
         DealPlayerHands();
+        DealMiddleCards();
     }
 
     private void DealPlayerHands()
     {
-        DrawCard(bottom, 4);
-        DrawCard(top, 4);
+        DrawCard(bottomPlayer, 4);
+        DrawCard(topPlayer, 4);
     }
 
     private void DealPlayerDecks()
@@ -77,22 +75,31 @@ public class GameControl : MonoBehaviour
 
             if (i < remainingCardCount / 2)
             {
-                top.playerDeck.Add(card);
+                topPlayer.playerDeck.Add(card);
                 card.transform.SetParent(topPlayerDeck.transform);
                 card.transform.position = topPlayerDeck.transform.position;
             }
             else
             {
-                bottom.playerDeck.Add(card);
+                bottomPlayer.playerDeck.Add(card);
                 card.transform.SetParent(bottomPlayerDeck.transform);
                 card.transform.position = bottomPlayerDeck.transform.position;
             }
         }
     }
 
-    private void DealMiddle()
+    public void DealMiddleCards()
     {
-        int sideCardCount = GameSettings.deckCount * 4 * 2;
+        var leftGroundCard = topPlayerDrawCards.transform.GetChild(topPlayerDrawCards.transform.childCount - 1).gameObject;
+        StartCoroutine(AnimationController.SlideTo(leftGroundCard, leftGroundCardHolder));
+
+        var rightGroundCard = bottomPlayerDrawCards.transform.GetChild(topPlayerDrawCards.transform.childCount - 1).gameObject;
+        StartCoroutine(AnimationController.SlideTo(rightGroundCard, rightGroundCardHolder));
+    }
+
+    private void DealSideCards()
+    {
+        int sideCardCount = GameSettings.deckCount * 4 * 2 + 2;
 
         for (int i = 0; i < sideCardCount; i++)
         {
@@ -108,7 +115,7 @@ public class GameControl : MonoBehaviour
             card.GetComponent<Card>().Suit = drawedCard.Suit;
             card.GetComponent<Card>().Value = drawedCard.Value;
 
-            if (i < 4)
+            if (i < 5)
             {
                 card.transform.SetParent(topPlayerDrawCards.transform);
                 card.transform.position = topPlayerDrawCards.transform.position;
@@ -118,27 +125,6 @@ public class GameControl : MonoBehaviour
                 card.transform.SetParent(bottomPlayerDrawCards.transform);
                 card.transform.position = bottomPlayerDrawCards.transform.position;
             }
-        }
-
-
-        for (int i = 0; i < 2; i++)
-        {
-            var drawedCard = DeckController.instance.DrawRandomCard();
-
-            var card = Instantiate(cardPrefab);
-            card.AddComponent<Card>();
-            card.name = drawedCard.CardName;
-            card.GetComponent<Image>().sprite = Resources.Load<Sprite>(card.name);
-
-            card.GetComponent<Card>().ID = drawedCard.ID;
-            card.GetComponent<Card>().CardName = drawedCard.CardName;
-            card.GetComponent<Card>().Suit = drawedCard.Suit;
-            card.GetComponent<Card>().Value = drawedCard.Value;
-
-            if (i == 0)
-                card.transform.SetParent(leftGroundCardHolder.transform);
-            else
-                card.transform.SetParent(rightGroundCardHolder.transform);
         }
     }
 
