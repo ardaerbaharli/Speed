@@ -42,8 +42,6 @@ public class GameControl : MonoBehaviour
 
     private void Start()
     {
-        DeckController.instance.CreateADeck();
-
         DealSideCards();
         DealPlayerDecks();
         DealPlayerHands();
@@ -73,6 +71,9 @@ public class GameControl : MonoBehaviour
             card.GetComponent<Card>().Suit = drawedCard.Suit;
             card.GetComponent<Card>().Value = drawedCard.Value;
 
+            card.AddComponent<Button>();
+            card.GetComponent<Button>().onClick.AddListener(delegate { card.GetComponent<Card>().CardClick(); });
+
             if (i < remainingCardCount / 2)
             {
                 topPlayer.playerDeck.Add(card);
@@ -90,11 +91,25 @@ public class GameControl : MonoBehaviour
 
     public void DealMiddleCards()
     {
-        var leftGroundCard = topPlayerDrawCards.transform.GetChild(topPlayerDrawCards.transform.childCount - 1).gameObject;
-        StartCoroutine(AnimationController.SlideTo(leftGroundCard, leftGroundCardHolder));
+        int topPlayerDrawCardsCount = topPlayerDrawCards.transform.childCount;
+        int bottomPlayerDrawCardsCount = topPlayerDrawCards.transform.childCount;
+        if (topPlayerDrawCardsCount > 0 && bottomPlayerDrawCardsCount > 0)
+        {
+            var leftGroundCard = topPlayerDrawCards.transform.GetChild(topPlayerDrawCardsCount - 1).gameObject;
+            StartCoroutine(AnimationController.SlideToMiddle(leftGroundCard, leftGroundCardHolder.transform));
 
-        var rightGroundCard = bottomPlayerDrawCards.transform.GetChild(topPlayerDrawCards.transform.childCount - 1).gameObject;
-        StartCoroutine(AnimationController.SlideTo(rightGroundCard, rightGroundCardHolder));
+            var rightGroundCard = bottomPlayerDrawCards.transform.GetChild(bottomPlayerDrawCardsCount - 1).gameObject;
+            StartCoroutine(AnimationController.SlideToMiddle(rightGroundCard, rightGroundCardHolder.transform));
+        }
+        else
+        {
+            SideCardsEmpty();
+        }
+    }
+
+    private void SideCardsEmpty()
+    {
+        throw new NotImplementedException();
     }
 
     private void DealSideCards()
@@ -141,12 +156,12 @@ public class GameControl : MonoBehaviour
                 var card = player.playerDeck.Last();
                 player.playerDeck.Remove(player.playerDeck.Last());
                 player.handCards.Add(card);
+                card.GetComponent<Card>().player = player;
                 cards.Add(card);
             }
-            StartCoroutine(AnimationController.SlideTo(cards, player));
+            StartCoroutine(AnimationController.SlideToHand(cards, player));
         }
     }
-
 
     public bool CheckIfSpeedIsValid()
     {
@@ -179,20 +194,11 @@ public class GameControl : MonoBehaviour
         return true;
     }
 
-    /// <summary>
-    /// Cooldown the player to prevent spamming.
-    /// </summary>
-    /// <param name="player">The player invoked the "Speed" action</param>
     public void SpeedCooldown(Player player)
     {
         player.Cooldown(GameSettings.cooldownTime);
     }
 
-    /// <summary>
-    /// Actual event of "Speed".
-    /// </summary>
-    /// <param name="fromThisPlayer">The player invoked the "Speed" action</param>
-    /// <param name="toThisPlayer">The player who will take the cards.</param>
     public void SpeedEvent(Player fromThisPlayer, Player toThisPlayer)
     {
         UpdateLastSpeed();
@@ -207,4 +213,53 @@ public class GameControl : MonoBehaviour
         lastSpeed.Add(leftGroundCardHolder.transform.GetChild(rightGroundCardHolder.transform.childCount - 1).transform.GetComponent<Card>());
         lastSpeed.Add(rightGroundCardHolder.transform.GetChild(rightGroundCardHolder.transform.childCount - 1).transform.GetComponent<Card>());
     }
+
+    public GameObject CanThisCard(GameObject cardOBject)
+    {
+        var card = cardOBject.GetComponent<Card>();
+
+        var leftCard = leftGroundCardHolder.transform.GetChild(leftGroundCardHolder.transform.childCount - 1).GetComponent<Card>();
+        var rightCard = rightGroundCardHolder.transform.GetChild(rightGroundCardHolder.transform.childCount - 1).GetComponent<Card>();
+        GameObject target = null;
+
+        if (IsCardMatching(card, leftCard))
+            target = leftGroundCardHolder;
+        else if (IsCardMatching(card, rightCard))
+            target = rightGroundCardHolder;
+
+        if (target != null)
+        {
+            Destroy(cardOBject.GetComponent<Button>());
+            StartCoroutine(AnimationController.SlideToMiddle(cardOBject, target.transform));
+            card.player.handCards.Remove(cardOBject);
+
+            DrawCard(card.player, 1);
+            twoMan.ResetKeys();
+        }
+        return target;
+    }
+
+    public bool IsCardMatching(Card card, Card holder)
+    {
+        bool isAisAce = card.Value == 1;
+        bool isAisK = card.Value == 13;
+
+        bool isBisAce = holder.Value == 1;
+        bool isBisK = holder.Value == 13;
+
+        if (isAisAce && isBisK)
+            return true;
+
+        if (isAisK && isBisAce)
+            return true;
+
+        if (card.Value == holder.Value - 1)
+            return true;
+
+        if (card.Value == holder.Value + 1)
+            return true;
+
+        return false;
+    }
+
 }
