@@ -732,7 +732,7 @@ PrefabInstance:
     - target: {fileID: 3955684184852874442, guid: c2a071a60473db740b5c64fb1e817610,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -435.39
+      value: -435.39062
       objectReference: {fileID: 0}
     - target: {fileID: 3955684184852874442, guid: c2a071a60473db740b5c64fb1e817610,
         type: 3}
@@ -1088,10 +1088,14 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1518711348}
     m_Modifications:
+    - target: {fileID: 0}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6835372021217954186, guid: d2b697d43e3de6a4fa90a81521df3993,
         type: 3}
       propertyPath: m_Name
-      value: BottomHand
+      value: Hand
       objectReference: {fileID: 0}
     - target: {fileID: 6835372021217954187, guid: d2b697d43e3de6a4fa90a81521df3993,
         type: 3}
@@ -2240,7 +2244,7 @@ PrefabInstance:
     - target: {fileID: 3955684184852874442, guid: c2a071a60473db740b5c64fb1e817610,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -435.39
+      value: -435.39062
       objectReference: {fileID: 0}
     - target: {fileID: 3955684184852874442, guid: c2a071a60473db740b5c64fb1e817610,
         type: 3}
@@ -2366,20 +2370,22 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1497151960}
     m_Modifications:
-    - target: {fileID: 6835372021217954184, guid: d2b697d43e3de6a4fa90a81521df3993,
-        type: 3}
+    - target: {fileID: 0}
       propertyPath: m_Spacing
       value: -200
       objectReference: {fileID: 0}
-    - target: {fileID: 6835372021217954184, guid: d2b697d43e3de6a4fa90a81521df3993,
-        type: 3}
+    - target: {fileID: 0}
       propertyPath: m_ChildAlignment
       value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: m_Enabled
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6835372021217954186, guid: d2b697d43e3de6a4fa90a81521df3993,
         type: 3}
       propertyPath: m_Name
-      value: TopHand
+      value: Hand
       objectReference: {fileID: 0}
     - target: {fileID: 6835372021217954187, guid: d2b697d43e3de6a4fa90a81521df3993,
         type: 3}
