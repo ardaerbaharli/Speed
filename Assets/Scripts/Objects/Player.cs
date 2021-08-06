@@ -9,8 +9,8 @@ public class Player : MonoBehaviour
     public float CooldownTime { get; set; }
     public bool DrawMiddle { get; set; }
 
-    public List<GameObject> handCards;
-    public List<GameObject> playerDeck;
+    public List<GameObject> handCards { get; set; }
+    public List<GameObject> playerDeck { get; set; }
     private void Awake()
     {
         handCards = new List<GameObject>();
@@ -27,21 +27,12 @@ public class Player : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Cooldown the speed button of this player.
-    /// </summary>
-    /// <param name="time">For how long</param>
     public void Cooldown(float time)
     {
         IsInCooldown = true;
         CooldownTime = time;
     }
 
-    /// <summary>
-    /// Give the cards in the hand to this player as the result of the speed
-    /// </summary>
-    /// <param name="toThisPlayer">Player who is getting the cards.</param>
-    /// <param name="fromThisPlayer">Player who is giving the cards.</param>
     public void GiveCards(Player fromThisPlayer, Player toThisPlayer)
     {
         if (fromThisPlayer.handCards.Count > 0)
@@ -51,17 +42,15 @@ public class Player : MonoBehaviour
 
             foreach (var card in fromThisPlayer.handCards.ToList())
             {
+                card.GetComponent<Card>().player = toThisPlayer;
+                toThisPlayer.handCards.Add(card);
                 fromThisPlayer.handCards.Remove(card);
+
             }
             GameControl.instance.DrawCard(fromThisPlayer, 4);
-            toThisPlayer.TakeCards(fromThisPlayer.handCards);
         }
     }
 
-    /// <summary>
-    /// Add given cards to the hand
-    /// </summary>
-    /// <param name="cards">List of Card objects</param>
     public void TakeCards(List<GameObject> cards)
     {
         foreach (var card in cards)
