@@ -28,6 +28,18 @@ public class Card : MonoBehaviour
     }
     public void CardClick()
     {
-        gameControl.CanThisCard(gameObject);
+        var target = gameControl.GetTargetCard(gameObject);
+
+        if (target != null)
+        {
+            Destroy(gameObject.GetComponent<Button>());
+            var parent = gameObject.transform.parent;
+            player.handCards.Remove(gameObject);
+            gameControl.DrawCard(player, 1);
+
+            StartCoroutine(AnimationController.SlideToMiddle(gameObject, target.transform));
+
+            StartCoroutine(AnimationController.AlignCards(parent));
+        }
     }
 }
