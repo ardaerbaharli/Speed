@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -92,7 +93,7 @@ public class GameControl : MonoBehaviour
     public void DealMiddleCards()
     {
         int topPlayerDrawCardsCount = topPlayerDrawCards.transform.childCount;
-        int bottomPlayerDrawCardsCount = topPlayerDrawCards.transform.childCount;
+        int bottomPlayerDrawCardsCount = bottomPlayerDrawCards.transform.childCount;
         if (topPlayerDrawCardsCount > 0 && bottomPlayerDrawCardsCount > 0)
         {
             var leftGroundCard = topPlayerDrawCards.transform.GetChild(topPlayerDrawCardsCount - 1).gameObject;
@@ -103,13 +104,33 @@ public class GameControl : MonoBehaviour
         }
         else
         {
-            SideCardsEmpty();
+            StartCoroutine(SideCardsEmpty());
         }
     }
 
-    private void SideCardsEmpty()
+    private IEnumerator SideCardsEmpty()
     {
-        throw new NotImplementedException();
+        int leftGroundCount = leftGroundCardHolder.transform.childCount;
+        int rightGroundCount = rightGroundCardHolder.transform.childCount;
+
+        for (int i = leftGroundCount - 1; i >= 0; i--)
+        {
+            var cardObj = leftGroundCardHolder.transform.GetChild(i).gameObject;
+            StartCoroutine(AnimationController.SlideToMiddle(cardObj, topPlayerDrawCards.transform));
+        }
+
+        for (int i = rightGroundCount - 1; i >= 0; i--)
+        {
+            var cardObj = rightGroundCardHolder.transform.GetChild(i).gameObject;
+            StartCoroutine(AnimationController.SlideToMiddle(cardObj, bottomPlayerDrawCards.transform));
+        }
+
+        do
+        {
+            yield return new WaitForEndOfFrame();
+        } while (bottomPlayerDrawCards.transform.GetChild(0).GetComponent<Card>().IsSliding || topPlayerDrawCards.transform.GetChild(0).GetComponent<Card>().IsSliding);
+
+        DealMiddleCards();
     }
 
     private void DealSideCards()
@@ -159,6 +180,7 @@ public class GameControl : MonoBehaviour
                 card.GetComponent<Card>().player = player;
                 cards.Add(card);
             }
+
             StartCoroutine(AnimationController.SlideToHand(cards, player));
         }
     }
@@ -210,13 +232,16 @@ public class GameControl : MonoBehaviour
     {
         lastSpeed.Clear();
 
-        lastSpeed.Add(leftGroundCardHolder.transform.GetChild(rightGroundCardHolder.transform.childCount - 1).transform.GetComponent<Card>());
-        lastSpeed.Add(rightGroundCardHolder.transform.GetChild(rightGroundCardHolder.transform.childCount - 1).transform.GetComponent<Card>());
+        if (rightGroundCardHolder.transform.childCount > 0 && leftGroundCardHolder.transform.childCount > 0)
+        {
+            lastSpeed.Add(leftGroundCardHolder.transform.GetChild(leftGroundCardHolder.transform.childCount - 1).transform.GetComponent<Card>());
+            lastSpeed.Add(rightGroundCardHolder.transform.GetChild(rightGroundCardHolder.transform.childCount - 1).transform.GetComponent<Card>());
+        }
     }
 
-    public GameObject CanThisCard(GameObject cardOBject)
+    public GameObject GetTargetCard(GameObject cardObject)
     {
-        var card = cardOBject.GetComponent<Card>();
+        var card = cardObject.GetComponent<Card>();
 
         var leftCard = leftGroundCardHolder.transform.GetChild(leftGroundCardHolder.transform.childCount - 1).GetComponent<Card>();
         var rightCard = rightGroundCardHolder.transform.GetChild(rightGroundCardHolder.transform.childCount - 1).GetComponent<Card>();
@@ -229,13 +254,9 @@ public class GameControl : MonoBehaviour
 
         if (target != null)
         {
-            Destroy(cardOBject.GetComponent<Button>());
-            StartCoroutine(AnimationController.SlideToMiddle(cardOBject, target.transform));
-            card.player.handCards.Remove(cardOBject);
-
-            DrawCard(card.player, 1);
             twoMan.ResetKeys();
         }
+
         return target;
     }
 
