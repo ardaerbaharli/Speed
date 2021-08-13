@@ -7,7 +7,7 @@ public class Card : MonoBehaviour
     public bool IsDummy { get; set; }
     public string CardName { get; set; }
     public int ID { get; set; }
-    public Player player { get; set; }
+    public Player Player { get; set; }
     public int Value;
     public string Suit;
 
@@ -34,8 +34,8 @@ public class Card : MonoBehaviour
         {
             Destroy(gameObject.GetComponent<Button>());
             var parent = gameObject.transform.parent;
-            player.handCards.Remove(gameObject);
-            gameControl.DrawCard(player, 1);
+            Player.HandCards.Remove(gameObject);
+            gameControl.DrawCard(Player, 1);
 
             StartCoroutine(AnimationController.SlideToMiddle(gameObject, target.transform));
 

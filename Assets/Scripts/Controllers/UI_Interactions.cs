@@ -1,19 +1,24 @@
 ﻿using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 public class UI_Interactions : MonoBehaviour
 {
-    private GameControl gameControl;
-    private Player bottomPlayer;
+    [SerializeField] GameObject topPlayerName;
+    [SerializeField] GameObject bottomPlayerName;
     private Player topPlayer;
+    private Player bottomPlayer;
+
+    private GameControl gameControl;
 
     private void Awake()
     {
         gameControl = gameObject.GetComponent<GameControl>();
 
-        bottomPlayer = gameControl.bottomPlayer;
         topPlayer = gameControl.topPlayer;
+        bottomPlayer = gameControl.bottomPlayer;
     }
+
 
     public void SpeedButton()
     {

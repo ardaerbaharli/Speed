@@ -14,7 +14,7 @@ public class AnimationController : MonoBehaviour
 
     public static IEnumerator SlideToHand(List<GameObject> cardObjects, Player toWho)
     {
-        var targetHand = toWho.playSide == PlaySide.Bottom ? GameControl.instance.bottomHand.transform : GameControl.instance.topHand.transform;
+        var targetHand = toWho.PlaySide == PlaySide.Bottom ? GameControl.instance.bottomHand.transform : GameControl.instance.topHand.transform;
 
         foreach (var card in cardObjects)
         {
@@ -30,37 +30,40 @@ public class AnimationController : MonoBehaviour
 
     public static IEnumerator AlignCards(Transform hand)
     {
-        float leftBorderX = 0f;
-        float rightBorderX = Screen.width;
-
-        int cardCount = hand.transform.childCount;
-
-        var cardSize = new Vector3(hand.transform.GetChild(0).GetComponent<RectTransform>().rect.width, 0, 0);
-
-        var leftborder = new Vector3(leftBorderX, hand.transform.position.y, 0) + cardSize / 4;
-        var rightBorder = new Vector3(rightBorderX, hand.transform.position.y, 0) - cardSize / 4;
-
-        var length = rightBorder - leftborder;
-        var distanceBetweenCards = length / (cardCount + 1);
-
-        var pos = leftborder;
-        for (int i = 0; i < cardCount; i++)
+        if (hand.childCount > 0)
         {
-            if (hand.transform.childCount < cardCount)
-                break;
+            float leftBorderX = 0f;
+            float rightBorderX = Screen.width;
 
-            pos += distanceBetweenCards;
-            var card = hand.transform.GetChild(i);
+            int cardCount = hand.transform.childCount;
 
-            float seconds = GameSettings.dealSlideTime;
-            float t = 0f;
-            while (t <= 1.0)
+            var cardSize = new Vector3(hand.transform.GetChild(0).GetComponent<RectTransform>().rect.width, 0, 0);
+
+            var leftborder = new Vector3(leftBorderX, hand.transform.position.y, 0) + cardSize / 4;
+            var rightBorder = new Vector3(rightBorderX, hand.transform.position.y, 0) - cardSize / 4;
+
+            var length = rightBorder - leftborder;
+            var distanceBetweenCards = length / (cardCount + 1);
+
+            var pos = leftborder;
+            for (int i = 0; i < cardCount; i++)
             {
-                t += Time.deltaTime / seconds;
-                card.transform.position = Vector3.Lerp(card.transform.position, pos, Mathf.SmoothStep(0f, 1f, t));
-                yield return null;
+                if (hand.transform.childCount < cardCount)
+                    break;
+
+                pos += distanceBetweenCards;
+                var card = hand.transform.GetChild(i);
+
+                float seconds = GameSettings.dealSlideTime;
+                float t = 0f;
+                while (t <= 1.0)
+                {
+                    t += Time.deltaTime / seconds;
+                    card.transform.position = Vector3.Lerp(card.transform.position, pos, Mathf.SmoothStep(0f, 1f, t));
+                    yield return null;
+                }
+                card.GetComponent<Canvas>().overrideSorting = false;
             }
-            card.GetComponent<Canvas>().overrideSorting = false;
         }
     }
 
