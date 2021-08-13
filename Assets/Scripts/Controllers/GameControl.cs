@@ -31,11 +31,13 @@ public class GameControl : MonoBehaviour
     private void Awake()
     {
         instance = this;
-
+        QualitySettings.vSyncCount = 0;
+        Application.targetFrameRate = 60;
         bottomPlayer = gameObject.AddComponent<Player>();
-        bottomPlayer.playSide = PlaySide.Bottom;
+        bottomPlayer.PlaySide = PlaySide.Bottom;
+
         topPlayer = gameObject.AddComponent<Player>();
-        topPlayer.playSide = PlaySide.Top;
+        topPlayer.PlaySide = PlaySide.Top;
 
         twoMan = gameObject.AddComponent<TwoPlayerKey>();
         twoMan.SetPlayers(bottomPlayer, topPlayer);
@@ -77,13 +79,13 @@ public class GameControl : MonoBehaviour
 
             if (i < remainingCardCount / 2)
             {
-                topPlayer.playerDeck.Add(card);
+                topPlayer.PlayerDeck.Add(card);
                 card.transform.SetParent(topPlayerDeck.transform);
                 card.transform.position = topPlayerDeck.transform.position;
             }
             else
             {
-                bottomPlayer.playerDeck.Add(card);
+                bottomPlayer.PlayerDeck.Add(card);
                 card.transform.SetParent(bottomPlayerDeck.transform);
                 card.transform.position = bottomPlayerDeck.transform.position;
             }
@@ -166,24 +168,30 @@ public class GameControl : MonoBehaviour
 
     public void DrawCard(Player player, int count)
     {
-        if (player.handCards.Count < 4 && player.playerDeck.Count != 0)
+        if (player.PlayerDeck.Count == 0 && player.HandCards.Count == 0)
         {
-            if (player.playerDeck.Count < count)
-                count = player.playerDeck.Count;
+            Gameover(player);
+        }
+        else if (player.HandCards.Count < 4 && player.PlayerDeck.Count != 0)
+        {
+            if (player.PlayerDeck.Count < count)
+                count = player.PlayerDeck.Count;
 
             var cards = new List<GameObject>();
             for (int i = 0; i < count; i++)
             {
-                var card = player.playerDeck.Last();
-                player.playerDeck.Remove(player.playerDeck.Last());
-                player.handCards.Add(card);
-                card.GetComponent<Card>().player = player;
+                var card = player.PlayerDeck.Last();
+                player.PlayerDeck.Remove(player.PlayerDeck.Last());
+                player.HandCards.Add(card);
+                card.GetComponent<Card>().Player = player;
                 cards.Add(card);
             }
 
             StartCoroutine(AnimationController.SlideToHand(cards, player));
         }
     }
+
+
 
     public bool CheckIfSpeedIsValid()
     {
@@ -237,6 +245,14 @@ public class GameControl : MonoBehaviour
             lastSpeed.Add(leftGroundCardHolder.transform.GetChild(leftGroundCardHolder.transform.childCount - 1).transform.GetComponent<Card>());
             lastSpeed.Add(rightGroundCardHolder.transform.GetChild(rightGroundCardHolder.transform.childCount - 1).transform.GetComponent<Card>());
         }
+    }
+    private void Gameover(Player winner)
+    {
+        winner.Score++;
+        string key = $"{winner.PlaySide}PlayerScore";
+        PlayerPrefs.SetInt(key, winner.Score);
+
+
     }
 
     public GameObject GetTargetCard(GameObject cardObject)
