@@ -274,26 +274,6 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 1719971255316476356}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &577509256 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 3090716448878021283, guid: c5f33ac1052592546a6dad0e4a6f766c,
-    type: 3}
-  m_PrefabInstance: {fileID: 1719971255316476356}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &577509258
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 577509256}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b129bd43bc7151345873a48951f24dce, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  fallingSymbol: {fileID: 473561960547231625, guid: fc4fb95cc4842624b97f8787f29436f4,
-    type: 3}
 --- !u!1 &708288001 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 708288001, guid: c5f33ac1052592546a6dad0e4a6f766c,
@@ -343,10 +323,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 52070533, guid: c5f33ac1052592546a6dad0e4a6f766c, type: 3}
-      propertyPath: m_Text
-      value: Bottom Player
-      objectReference: {fileID: 0}
     - target: {fileID: 67314966, guid: c5f33ac1052592546a6dad0e4a6f766c, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
@@ -359,10 +335,6 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 4858905302551943618}
-    - target: {fileID: 1345057634, guid: c5f33ac1052592546a6dad0e4a6f766c, type: 3}
-      propertyPath: m_Text
-      value: Top Player
-      objectReference: {fileID: 0}
     - target: {fileID: 1456352579, guid: c5f33ac1052592546a6dad0e4a6f766c, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
@@ -476,11 +448,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Canvas
-      objectReference: {fileID: 0}
-    - target: {fileID: 3831777574574107498, guid: c5f33ac1052592546a6dad0e4a6f766c,
-        type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: -0.041015625
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c5f33ac1052592546a6dad0e4a6f766c, type: 3}
