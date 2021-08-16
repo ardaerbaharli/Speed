@@ -21,6 +21,9 @@ public class AnimationController : MonoBehaviour
             card.GetComponent<Canvas>().overrideSorting = true;
             card.GetComponent<Canvas>().sortingOrder = -1;
             card.transform.SetParent(targetHand);
+
+            card.GetComponent<RectTransform>().anchorMin = new Vector2(0.5f, 0.5f);
+            card.GetComponent<RectTransform>().anchorMax = new Vector2(0.5f, 0.5f);
         }
 
         instance.StartCoroutine(AlignCards(targetHand));
