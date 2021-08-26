@@ -65,6 +65,7 @@ public class GameControl : MonoBehaviour
             var drawedCard = DeckController.instance.DrawRandomCard();
 
             var card = Instantiate(cardPrefab);
+            card.GetComponent<RectTransform>().localScale = CardScaler();
             card.AddComponent<Card>();
             card.name = drawedCard.CardName;
             card.GetComponent<Image>().sprite = Resources.Load<Sprite>(card.name);
@@ -90,6 +91,13 @@ public class GameControl : MonoBehaviour
                 card.transform.position = bottomPlayerDeck.transform.position;
             }
         }
+    }
+
+    private Vector3 CardScaler()
+    {
+        float currentHeight = Screen.height;
+        float rate = currentHeight / GameSettings.referenceScreenHeight;
+        return GameSettings.referenceCardScale * rate;
     }
 
     public void DealMiddleCards()
@@ -144,6 +152,7 @@ public class GameControl : MonoBehaviour
             var drawedCard = DeckController.instance.DrawRandomCard();
 
             var card = Instantiate(cardPrefab);
+            card.GetComponent<RectTransform>().localScale = CardScaler();
             card.AddComponent<Card>();
             card.name = drawedCard.CardName;
             card.GetComponent<Image>().sprite = Resources.Load<Sprite>(card.name);
