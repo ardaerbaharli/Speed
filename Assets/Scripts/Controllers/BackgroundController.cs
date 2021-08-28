@@ -3,11 +3,12 @@ using UnityEngine.UI;
 
 public class BackgroundController : MonoBehaviour
 {
-    [SerializeField] GameObject fallingSymbol;
+    [SerializeField] private   GameObject fallingSymbol;
     private readonly string[] Suits = new string[] { "Spade", "Heart", "Club", "Diamond" };
     private int interval;
     void Start()
     {
+        SetBackground();
         interval = GetInterval();
     }
 
@@ -18,7 +19,7 @@ public class BackgroundController : MonoBehaviour
             interval = GetInterval();
             var obj = Instantiate(fallingSymbol, transform);
             int index = Random.Range(0, 4);
-            obj.GetComponent<Image>().sprite = Resources.Load<Sprite>(Suits[index]);
+            obj.GetComponent<Image>().sprite = Resources.Load<Sprite>($"Suits/{Suits[index]}");
             obj.name = Suits[index];
         }
     }
@@ -26,5 +27,11 @@ public class BackgroundController : MonoBehaviour
     private int GetInterval()
     {
         return Random.Range(200, 250);
+    }
+
+    private void SetBackground()
+    {
+        int index = Random.Range(0, 7);
+        gameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>($"Backgrounds/BG{index}");
     }
 }
