@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -31,8 +30,10 @@ public class GameControl : MonoBehaviour
     private void Awake()
     {
         instance = this;
+
         QualitySettings.vSyncCount = 0;
         Application.targetFrameRate = 60;
+
         bottomPlayer = gameObject.AddComponent<Player>();
         bottomPlayer.PlaySide = PlaySide.Bottom;
 
@@ -42,6 +43,7 @@ public class GameControl : MonoBehaviour
         twoMan = gameObject.AddComponent<TwoPlayerKey>();
         twoMan.SetPlayers(bottomPlayer, topPlayer);
     }
+
 
     private void Start()
     {
@@ -64,16 +66,7 @@ public class GameControl : MonoBehaviour
         {
             var drawedCard = DeckController.instance.DrawRandomCard();
 
-            var card = Instantiate(cardPrefab);
-            card.GetComponent<RectTransform>().localScale = CardScaler();
-            card.AddComponent<Card>();
-            card.name = drawedCard.CardName;
-            card.GetComponent<Image>().sprite = Resources.Load<Sprite>(card.name);
-
-            card.GetComponent<Card>().ID = drawedCard.ID;
-            card.GetComponent<Card>().CardName = drawedCard.CardName;
-            card.GetComponent<Card>().Suit = drawedCard.Suit;
-            card.GetComponent<Card>().Value = drawedCard.Value;
+            var card = CreateCard(drawedCard);
 
             card.AddComponent<Button>();
             card.GetComponent<Button>().onClick.AddListener(delegate { card.GetComponent<Card>().CardClick(); });
@@ -150,17 +143,7 @@ public class GameControl : MonoBehaviour
         for (int i = 0; i < sideCardCount; i++)
         {
             var drawedCard = DeckController.instance.DrawRandomCard();
-
-            var card = Instantiate(cardPrefab);
-            card.GetComponent<RectTransform>().localScale = CardScaler();
-            card.AddComponent<Card>();
-            card.name = drawedCard.CardName;
-            card.GetComponent<Image>().sprite = Resources.Load<Sprite>(card.name);
-
-            card.GetComponent<Card>().ID = drawedCard.ID;
-            card.GetComponent<Card>().CardName = drawedCard.CardName;
-            card.GetComponent<Card>().Suit = drawedCard.Suit;
-            card.GetComponent<Card>().Value = drawedCard.Value;
+            var card = CreateCard(drawedCard);
 
             if (i < 5)
             {
@@ -173,6 +156,20 @@ public class GameControl : MonoBehaviour
                 card.transform.position = bottomPlayerDrawCards.transform.position;
             }
         }
+    }
+
+    private GameObject CreateCard(Card drawedCard)
+    {
+        var card = Instantiate(cardPrefab);
+        card.GetComponent<RectTransform>().localScale = CardScaler();
+        card.AddComponent<Card>();
+        card.name = drawedCard.CardName;
+        card.GetComponent<Image>().sprite = Resources.Load<Sprite>($"Cards/{card.name}");
+        card.GetComponent<Card>().ID = drawedCard.ID;
+        card.GetComponent<Card>().CardName = drawedCard.CardName;
+        card.GetComponent<Card>().Suit = drawedCard.Suit;
+        card.GetComponent<Card>().Value = drawedCard.Value;
+        return card;
     }
 
     public void DrawCard(Player player, int count)
