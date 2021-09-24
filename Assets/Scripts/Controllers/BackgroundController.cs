@@ -12,7 +12,7 @@ public class BackgroundController : MonoBehaviour
         interval = GetInterval();
     }
 
-    void Update()
+    void FixedUpdate()
     {
         if (Time.frameCount % interval == 0)
         {

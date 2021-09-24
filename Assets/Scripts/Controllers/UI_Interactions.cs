@@ -4,8 +4,11 @@ using UnityEngine.UI;
 
 public class UI_Interactions : MonoBehaviour
 {
-    [SerializeField] GameObject topPlayerName;
-    [SerializeField] GameObject bottomPlayerName;
+    [SerializeField] private GameObject canvas;
+    [SerializeField] private GameObject topPlayerName;
+    [SerializeField] private GameObject bottomPlayerName;
+    [SerializeField] private GameObject pauseMenu;
+
     private Player topPlayer;
     private Player bottomPlayer;
 
@@ -48,4 +51,10 @@ public class UI_Interactions : MonoBehaviour
             gameControl.DealMiddleCards();
         }
     }
+
+    public void PauseButton()
+    {
+        var menu = Instantiate(pauseMenu, canvas.transform);
+        menu.tag = "PauseMenu";
+    }   
 }

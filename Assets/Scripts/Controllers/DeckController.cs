@@ -17,7 +17,7 @@ public class DeckController : MonoBehaviour
         var deck = new List<Card>();
         for (int i = 0; i < 52; i++)
         {
-            var card = cardobj.AddComponent<Card>();//gameObject.AddComponent<Card>();
+            var card = cardobj.AddComponent<Card>();
             card.ID = i;
 
             int cardValueIndex = card.ID % 13;
