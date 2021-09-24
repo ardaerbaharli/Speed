@@ -85,8 +85,8 @@ public class AnimationController : MonoBehaviour
             var position = targetParent.transform.position;
             card.GetComponent<Card>().IsSliding = true;
 
-            card.GetComponent<Canvas>().overrideSorting = true;
-            card.GetComponent<Canvas>().sortingOrder = 2;
+            //card.GetComponent<Canvas>().overrideSorting = true;
+            //card.GetComponent<Canvas>().sortingOrder = 2;
 
             float seconds = time;
             float t = 0f;
