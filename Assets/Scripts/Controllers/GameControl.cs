@@ -27,6 +27,8 @@ public class GameControl : MonoBehaviour
 
     private List<Card> lastSpeed = new List<Card>();
 
+    private bool isGameOver;
+
     private void Awake()
     {
         instance = this;
@@ -43,7 +45,16 @@ public class GameControl : MonoBehaviour
         twoMan = gameObject.AddComponent<TwoPlayerKey>();
         twoMan.SetPlayers(bottomPlayer, topPlayer);
     }
-
+    private void Update()
+    {
+        if (!isGameOver)
+        {
+            if (!bottomPlayer.HasCards)
+                Gameover(bottomPlayer);
+            else if (!topPlayer.HasCards)
+                Gameover(topPlayer);
+        }
+    }
 
     private void Start()
     {
@@ -73,13 +84,13 @@ public class GameControl : MonoBehaviour
 
             if (i < remainingCardCount / 2)
             {
-                topPlayer.PlayerDeck.Add(card);
+                topPlayer.AddCardToDeck(card);
                 card.transform.SetParent(topPlayerDeck.transform);
                 card.transform.position = topPlayerDeck.transform.position;
             }
             else
             {
-                bottomPlayer.PlayerDeck.Add(card);
+                bottomPlayer.AddCardToDeck(card);
                 card.transform.SetParent(bottomPlayerDeck.transform);
                 card.transform.position = bottomPlayerDeck.transform.position;
             }
@@ -174,21 +185,21 @@ public class GameControl : MonoBehaviour
 
     public void DrawCard(Player player, int count)
     {
-        if (player.PlayerDeck.Count == 0 && player.HandCards.Count == 0)
+        if (!player.HasCards)
         {
             Gameover(player);
         }
-        else if (player.HandCards.Count < 4 && player.PlayerDeck.Count != 0)
+        else if (player.HandCards.Count < 4 && player.Deck.Count != 0)
         {
-            if (player.PlayerDeck.Count < count)
-                count = player.PlayerDeck.Count;
+            if (player.Deck.Count < count)
+                count = player.Deck.Count;
 
             var cards = new List<GameObject>();
             for (int i = 0; i < count; i++)
             {
-                var card = player.PlayerDeck.Last();
-                player.PlayerDeck.Remove(player.PlayerDeck.Last());
-                player.HandCards.Add(card);
+                var card = player.Deck.Last();
+                player.RemoveCardFromDeck(player.Deck.Last());
+                player.AddCardToHand(card);
                 card.GetComponent<Card>().Player = player;
                 cards.Add(card);
             }
@@ -254,10 +265,10 @@ public class GameControl : MonoBehaviour
     }
     private void Gameover(Player winner)
     {
+        isGameOver = true;
         winner.Score++;
         string key = $"{winner.PlaySide}PlayerScore";
         PlayerPrefs.SetInt(key, winner.Score);
-
 
     }
 

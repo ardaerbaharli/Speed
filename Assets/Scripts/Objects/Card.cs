@@ -16,7 +16,7 @@ public class Card : MonoBehaviour
     {
         gameControl = FindObjectOfType<GameControl>();
     }
-
+   
     public static bool IsEqual(Card a, Card b)
     {
         if (a.CardName == b.CardName &&
