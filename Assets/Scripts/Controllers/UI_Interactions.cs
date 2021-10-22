@@ -30,7 +30,6 @@ public class UI_Interactions : MonoBehaviour
         Player whoClicked = clickedButton.name.Substring("SpeedButton_".Length) == "Top" ? topPlayer : bottomPlayer;
         Player to = whoClicked == topPlayer ? bottomPlayer : topPlayer;
 
-
         if (gameControl.CheckIfSpeedIsValid())
         {
             if (!whoClicked.IsInCooldown)
