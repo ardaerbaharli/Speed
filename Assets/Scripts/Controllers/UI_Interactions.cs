@@ -25,29 +25,35 @@ public class UI_Interactions : MonoBehaviour
 
     public void SpeedButton()
     {
-        var clickedButton = EventSystem.current.currentSelectedGameObject;
-
-        Player whoClicked = clickedButton.name.Substring("SpeedButton_".Length) == "Top" ? topPlayer : bottomPlayer;
-        Player to = whoClicked == topPlayer ? bottomPlayer : topPlayer;
-
-        if (gameControl.CheckIfSpeedIsValid())
+        if (!gameControl.isGameOver)
         {
-            if (!whoClicked.IsInCooldown)
-                gameControl.SpeedEvent(whoClicked, to);
+            var clickedButton = EventSystem.current.currentSelectedGameObject;
+
+            Player whoClicked = clickedButton.name.Substring("SpeedButton_".Length) == "Top" ? topPlayer : bottomPlayer;
+            Player to = whoClicked == topPlayer ? bottomPlayer : topPlayer;
+
+            if (gameControl.CheckIfSpeedIsValid())
+            {
+                if (!whoClicked.IsInCooldown)
+                    gameControl.SpeedEvent(whoClicked, to);
+            }
+            else gameControl.SpeedCooldown(whoClicked);
         }
-        else gameControl.SpeedCooldown(whoClicked);
     }
 
     public void DrawMiddleButton()
     {
-        var clickedButton = EventSystem.current.currentSelectedGameObject;
-        var player = clickedButton.name.Substring("DrawMiddleButton_".Length) == "Top" ? topPlayer : bottomPlayer;
-
-        gameControl.twoMan.SetTrue(player);
-        if (gameControl.twoMan.IsBothPlayersAccepted())
+        if (!gameControl.isGameOver)
         {
-            gameControl.twoMan.ResetKeys();
-            gameControl.DealMiddleCards();
+            var clickedButton = EventSystem.current.currentSelectedGameObject;
+            var player = clickedButton.name.Substring("DrawMiddleButton_".Length) == "Top" ? topPlayer : bottomPlayer;
+
+            gameControl.twoMan.SetTrue(player);
+            if (gameControl.twoMan.IsBothPlayersAccepted())
+            {
+                gameControl.twoMan.ResetKeys();
+                gameControl.DealMiddleCards();
+            }
         }
     }
 
@@ -55,5 +61,5 @@ public class UI_Interactions : MonoBehaviour
     {
         var menu = Instantiate(pauseMenu, canvas.transform);
         menu.tag = "PauseMenu";
-    }   
+    }
 }

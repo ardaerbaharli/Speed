@@ -16,7 +16,7 @@ public class Card : MonoBehaviour
     {
         gameControl = FindObjectOfType<GameControl>();
     }
-   
+
     public static bool IsEqual(Card a, Card b)
     {
         if (a.CardName == b.CardName &&
@@ -28,18 +28,21 @@ public class Card : MonoBehaviour
     }
     public void CardClick()
     {
-        var target = gameControl.GetTargetCard(gameObject);
-
-        if (target != null)
+        if (!gameControl.isGameOver)
         {
-            Destroy(gameObject.GetComponent<Button>());
-            var parent = gameObject.transform.parent;
-            Player.HandCards.Remove(gameObject);
-            gameControl.DrawCard(Player, 1);
+            var target = gameControl.GetTargetCard(gameObject);
 
-            StartCoroutine(AnimationController.SlideToMiddle(gameObject, target.transform));
+            if (target != null)
+            {
+                Destroy(gameObject.GetComponent<Button>());
+                var parent = gameObject.transform.parent;
+                Player.HandCards.Remove(gameObject);
+                gameControl.DrawCard(Player, 1);
 
-            StartCoroutine(AnimationController.AlignCards(parent));
+                StartCoroutine(AnimationController.SlideToMiddle(gameObject, target.transform));
+
+                StartCoroutine(AnimationController.AlignCards(parent));
+            }
         }
     }
 }

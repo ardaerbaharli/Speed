@@ -27,7 +27,7 @@ public class GameControl : MonoBehaviour
 
     private List<Card> lastSpeed = new List<Card>();
 
-    private bool isGameOver;
+    public bool isGameOver;
 
     private void Awake()
     {
