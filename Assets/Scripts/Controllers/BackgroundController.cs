@@ -1,37 +1,45 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-public class BackgroundController : MonoBehaviour
+namespace Controllers
 {
-    [SerializeField] private   GameObject fallingSymbol;
-    private readonly string[] Suits = new string[] { "Spade", "Heart", "Club", "Diamond" };
-    private int interval;
-    void Start()
+    public class BackgroundController : MonoBehaviour
     {
-        SetBackground();
-        interval = GetInterval();
-    }
+        [SerializeField] private GameObject fallingSymbol;
+        private readonly string[] suits = {"Spade", "Heart", "Club", "Diamond"};
+        private int interval;
 
-    void FixedUpdate()
-    {
-        if (Time.frameCount % interval == 0)
+        void Start()
         {
-            interval = GetInterval();
+            SetBackground();
+            interval = RandomInterval();
+        }
+
+        private void FixedUpdate()
+        {
+            if (Time.frameCount % interval != 0) return;
+
+            interval = RandomInterval();
+            CreateRandomSymbol();
+        }
+
+        private void CreateRandomSymbol()
+        {
             var obj = Instantiate(fallingSymbol, transform);
             int index = Random.Range(0, 4);
-            obj.GetComponent<Image>().sprite = Resources.Load<Sprite>($"Suits/{Suits[index]}");
-            obj.name = Suits[index];
+            obj.GetComponent<Image>().sprite = Resources.Load<Sprite>($"Suits/{suits[index]}");
+            obj.name = suits[index];
         }
-    }
 
-    private int GetInterval()
-    {
-        return Random.Range(200, 250);
-    }
+        private int RandomInterval()
+        {
+            return Random.Range(200, 250);
+        }
 
-    private void SetBackground()
-    {
-        int index = Random.Range(0, 7);
-        gameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>($"Backgrounds/BG{index}");
+        private void SetBackground()
+        {
+            int index = Random.Range(0, 7);
+            gameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>($"Backgrounds/BG{index}");
+        }
     }
 }

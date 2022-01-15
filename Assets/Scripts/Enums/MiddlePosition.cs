@@ -1,1 +1,0 @@
-﻿public enum MiddlePosition { Left, Right };

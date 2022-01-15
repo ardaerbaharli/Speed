@@ -2,34 +2,38 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class SceneController : MonoBehaviour
+namespace Controllers
 {
-    private static SceneController instance;
-    void Start()
+    public class SceneController : MonoBehaviour
     {
-        instance = this;
-        DontDestroyOnLoad(gameObject);
-    }
- 
-    public static void LoadGameScreen()
-    {
-        instance.StartCoroutine(LoadAsyncScene("Game"));
-    }
+        public static SceneController instance;
 
-    public static void LoadMainScreen()
-    {
-        instance.StartCoroutine(LoadAsyncScene("Main"));
-    }
-
-    public static IEnumerator LoadAsyncScene(string sceneName)
-    {
-        System.GC.Collect();
-        Resources.UnloadUnusedAssets();
-        AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneName);
-
-        while (!asyncLoad.isDone)
+        void Start()
         {
-            yield return null;
+            instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+
+        public void LoadGameScreen()
+        {
+            instance.StartCoroutine(LoadAsyncScene("Game"));
+        }
+
+        public void LoadMainScreen()
+        {
+            instance.StartCoroutine(LoadAsyncScene("Menu"));
+        }
+
+        private IEnumerator LoadAsyncScene(string sceneName)
+        {
+            System.GC.Collect();
+            Resources.UnloadUnusedAssets();
+            AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneName);
+
+            while (!asyncLoad.isDone)
+            {
+                yield return null;
+            }
         }
     }
 }

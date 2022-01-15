@@ -1,319 +1,373 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
+using Objects;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class GameControl : MonoBehaviour
+namespace Controllers
 {
-    public GameObject leftGroundCardHolder;
-    public GameObject rightGroundCardHolder;
-
-    public GameObject topPlayerDrawCards;
-    public GameObject bottomPlayerDrawCards;
-
-    public GameObject topHand;
-    public GameObject bottomHand;
-
-    public GameObject bottomPlayerDeck;
-    public GameObject topPlayerDeck;
-
-    public GameObject cardPrefab;
-    public static GameControl instance;
-
-    public TwoPlayerKey twoMan;
-
-    public Player bottomPlayer, topPlayer;
-
-    private List<Card> lastSpeed = new List<Card>();
-
-    public bool isGameOver;
-
-    private void Awake()
+    public enum PlaySide
     {
-        instance = this;
+        Top,
+        Bottom
+    };
 
-        QualitySettings.vSyncCount = 0;
-        Application.targetFrameRate = 60;
-
-        bottomPlayer = gameObject.AddComponent<Player>();
-        bottomPlayer.PlaySide = PlaySide.Bottom;
-
-        topPlayer = gameObject.AddComponent<Player>();
-        topPlayer.PlaySide = PlaySide.Top;
-
-        twoMan = gameObject.AddComponent<TwoPlayerKey>();
-        twoMan.SetPlayers(bottomPlayer, topPlayer);
-    }
-    private void Update()
+    public class GameControl : MonoBehaviour
     {
-        if (!isGameOver)
+        [Header("Main Objects")] [SerializeField]
+        private GameObject gamePanel;
+
+        [SerializeField] private GameObject gameOverPanel;
+
+        [Header("Prefabs")] [SerializeField] private GameObject cardPrefab;
+        [SerializeField] private GameObject playerPrefab;
+        [SerializeField] private DeckController deckControllerPrefab;
+        [SerializeField] private TwoPlayerKey twoPlayerKeyPrefab;
+
+        [Header("Scene objects")] [SerializeField]
+        private GameObject leftGroundCardHolder;
+
+        [SerializeField] private GameObject rightGroundCardHolder;
+
+        [SerializeField] private GameObject leftDrawDeck;
+        [SerializeField] private GameObject rightDrawDeck;
+
+        [SerializeField] private Transform topHand;
+        [SerializeField] private Transform bottomHand;
+
+        [SerializeField] private GameObject topPlayerDeck;
+        [SerializeField] private GameObject bottomPlayerDeck;
+
+        [SerializeField] private GameObject numberOfCardsTextBottom;
+        [SerializeField] private GameObject numberOfCardsTextTop;
+
+        [NonSerialized] public Player bottomPlayer, topPlayer;
+        [NonSerialized] public TwoPlayerKey twoPlayerKey;
+        public bool isGameOver;
+
+        private GameObject bottomPlayerObject, topPlayerObject;
+        private DeckController deckController;
+        private KeyValuePair<Card, Card> lastSpeed;
+        private UIInteractions uiInteractions;
+
+        private readonly Vector3 referenceCardScale = new Vector3(0.6499999f, 1.17f, 1f);
+        private const float CooldownTime = 2f;
+        private const int NumberOfDecks = 1;
+        private const int NumberOfSides = 2;
+        private const int NumberOfCardsOnSides = 4;
+        private const int NumberOfCardsInTheMiddle = 2;
+        private const int ReferenceScreenHeight = 2160;
+
+
+        private void Awake()
         {
+            QualitySettings.vSyncCount = 0;
+            Application.targetFrameRate = 60;
+
+            uiInteractions = GetComponent<UIInteractions>();
+
+            bottomPlayerObject = Instantiate(playerPrefab);
+            bottomPlayerObject.name = "Bottom Player";
+            bottomPlayer = bottomPlayerObject.GetComponent<Player>();
+            bottomPlayer.playSide = PlaySide.Bottom;
+            bottomPlayer.SetHand(bottomHand);
+            bottomPlayer.SetGameControl(this);
+            bottomPlayer.SetNumberOfCardsText(numberOfCardsTextBottom);
+
+            topPlayerObject = Instantiate(playerPrefab);
+            topPlayerObject.name = "Top Player";
+            topPlayer = topPlayerObject.GetComponent<Player>();
+            topPlayer.playSide = PlaySide.Top;
+            topPlayer.SetHand(topHand);
+            topPlayer.SetGameControl(this);
+            topPlayer.SetNumberOfCardsText(numberOfCardsTextTop);
+
+            deckController = Instantiate(deckControllerPrefab);
+            deckController.CreateADeck();
+
+
+            twoPlayerKey = Instantiate(twoPlayerKeyPrefab);
+            twoPlayerKey.SetPlayers(bottomPlayer, topPlayer);
+
+            lastSpeed = new KeyValuePair<Card, Card>();
+
+            DealSideCards();
+            DealPlayerDecks();
+            DealPlayerHands();
+            DealMiddleCards();
+        }
+
+        private void Update()
+        {
+            if (isGameOver) return;
+
             if (!bottomPlayer.HasCards)
-                Gameover(bottomPlayer);
+                StartCoroutine(GameOver(bottomPlayer));
             else if (!topPlayer.HasCards)
-                Gameover(topPlayer);
+                StartCoroutine(GameOver(topPlayer));
         }
-    }
 
-    private void Start()
-    {
-        DealSideCards();
-        DealPlayerDecks();
-        DealPlayerHands();
-        DealMiddleCards();
-    }
-
-    private void DealPlayerHands()
-    {
-        DrawCard(bottomPlayer, 4);
-        DrawCard(topPlayer, 4);
-    }
-
-    private void DealPlayerDecks()
-    {
-        int remainingCardCount = DeckController.instance.deck.Count;
-        for (int i = 0; i < remainingCardCount; i++)
+        private void DealSideCards()
         {
-            var drawedCard = DeckController.instance.DrawRandomCard();
+            var sideCardCount = NumberOfDecks * NumberOfSides * NumberOfCardsOnSides +
+                                NumberOfCardsInTheMiddle;
 
-            var card = CreateCard(drawedCard);
-
-            card.AddComponent<Button>();
-            card.GetComponent<Button>().onClick.AddListener(delegate { card.GetComponent<Card>().CardClick(); });
-
-            if (i < remainingCardCount / 2)
+            for (int i = 0; i < sideCardCount; i++)
             {
-                topPlayer.AddCardToDeck(card);
-                card.transform.SetParent(topPlayerDeck.transform);
-                card.transform.position = topPlayerDeck.transform.position;
+                var cardConfig = deckController.DrawRandomCard();
+                var card = CreateCardObject(cardConfig, false);
+
+                if (i < 5)
+                {
+                    card.transform.SetParent(leftDrawDeck.transform);
+                    card.transform.position = leftDrawDeck.transform.position;
+                }
+                else
+                {
+                    card.transform.SetParent(rightDrawDeck.transform);
+                    card.transform.position = rightDrawDeck.transform.position;
+                }
+            }
+        }
+
+        private void DealPlayerDecks()
+        {
+            int remainingCardCount = deckController.deck.Count;
+            for (int i = 0; i < remainingCardCount; i++)
+            {
+                var cardConfig = deckController.DrawRandomCard();
+                var card = CreateCardObject(cardConfig);
+
+                if (i < remainingCardCount / 2)
+                {
+                    topPlayer.AddCardToDeck(card);
+                    card.transform.SetParent(topPlayerDeck.transform);
+                    card.transform.position = topPlayerDeck.transform.position;
+                    card.GetComponent<Card>().AdjustRotation();
+                }
+                else
+                {
+                    bottomPlayer.AddCardToDeck(card);
+                    card.transform.SetParent(bottomPlayerDeck.transform);
+                    card.transform.position = bottomPlayerDeck.transform.position;
+                }
+            }
+        }
+
+        private void DealPlayerHands()
+        {
+            bottomPlayer.DrawCard(4);
+            topPlayer.DrawCard(4);
+        }
+
+        private Vector3 GetScale()
+        {
+            float currentHeight = Screen.height;
+            float ratio = currentHeight / ReferenceScreenHeight;
+            return referenceCardScale * ratio;
+        }
+
+        public void DealMiddleCards()
+        {
+            var topPlayerDrawDeckTransform = leftDrawDeck.transform;
+            var bottomPlayerDrawDeckTransform = rightDrawDeck.transform;
+
+            int topPlayerDrawCardsCount = topPlayerDrawDeckTransform.childCount;
+            int bottomPlayerDrawCardsCount = bottomPlayerDrawDeckTransform.childCount;
+            if (topPlayerDrawCardsCount > 0 && bottomPlayerDrawCardsCount > 0)
+            {
+                var leftGroundCard = topPlayerDrawDeckTransform.GetChild(topPlayerDrawCardsCount - 1).gameObject;
+                leftGroundCard.GetComponent<Card>().SlideToMiddle(leftGroundCardHolder.transform);
+
+                var rightGroundCard =
+                    bottomPlayerDrawDeckTransform.GetChild(bottomPlayerDrawCardsCount - 1).gameObject;
+                rightGroundCard.GetComponent<Card>().SlideToMiddle(rightGroundCardHolder.transform);
             }
             else
             {
-                bottomPlayer.AddCardToDeck(card);
-                card.transform.SetParent(bottomPlayerDeck.transform);
-                card.transform.position = bottomPlayerDeck.transform.position;
+                StartCoroutine(SideCardsEmpty());
             }
         }
-    }
 
-    private Vector3 CardScaler()
-    {
-        float currentHeight = Screen.height;
-        float rate = currentHeight / GameSettings.referenceScreenHeight;
-        return GameSettings.referenceCardScale * rate;
-    }
-
-    public void DealMiddleCards()
-    {
-        int topPlayerDrawCardsCount = topPlayerDrawCards.transform.childCount;
-        int bottomPlayerDrawCardsCount = bottomPlayerDrawCards.transform.childCount;
-        if (topPlayerDrawCardsCount > 0 && bottomPlayerDrawCardsCount > 0)
+        private IEnumerator SideCardsEmpty()
         {
-            var leftGroundCard = topPlayerDrawCards.transform.GetChild(topPlayerDrawCardsCount - 1).gameObject;
-            StartCoroutine(AnimationController.SlideToMiddle(leftGroundCard, leftGroundCardHolder.transform));
+            var leftGroundCardHolderTransform = leftGroundCardHolder.transform;
+            var rightGroundCardHolderTransform = rightGroundCardHolder.transform;
 
-            var rightGroundCard = bottomPlayerDrawCards.transform.GetChild(bottomPlayerDrawCardsCount - 1).gameObject;
-            StartCoroutine(AnimationController.SlideToMiddle(rightGroundCard, rightGroundCardHolder.transform));
-        }
-        else
-        {
-            StartCoroutine(SideCardsEmpty());
-        }
-    }
+            int leftGroundCount = leftGroundCardHolderTransform.childCount;
+            int rightGroundCount = rightGroundCardHolderTransform.childCount;
 
-    private IEnumerator SideCardsEmpty()
-    {
-        int leftGroundCount = leftGroundCardHolder.transform.childCount;
-        int rightGroundCount = rightGroundCardHolder.transform.childCount;
-
-        for (int i = leftGroundCount - 1; i >= 0; i--)
-        {
-            var cardObj = leftGroundCardHolder.transform.GetChild(i).gameObject;
-            StartCoroutine(AnimationController.SlideToMiddle(cardObj, topPlayerDrawCards.transform));
-        }
-
-        for (int i = rightGroundCount - 1; i >= 0; i--)
-        {
-            var cardObj = rightGroundCardHolder.transform.GetChild(i).gameObject;
-            StartCoroutine(AnimationController.SlideToMiddle(cardObj, bottomPlayerDrawCards.transform));
-        }
-
-        do
-        {
-            yield return new WaitForEndOfFrame();
-        } while (bottomPlayerDrawCards.transform.GetChild(0).GetComponent<Card>().IsSliding || topPlayerDrawCards.transform.GetChild(0).GetComponent<Card>().IsSliding);
-
-        DealMiddleCards();
-    }
-
-    private void DealSideCards()
-    {
-        int sideCardCount = GameSettings.deckCount * 4 * 2 + 2;
-
-        for (int i = 0; i < sideCardCount; i++)
-        {
-            var drawedCard = DeckController.instance.DrawRandomCard();
-            var card = CreateCard(drawedCard);
-
-            if (i < 5)
+            for (int i = leftGroundCount - 1; i >= 0; i--)
             {
-                card.transform.SetParent(topPlayerDrawCards.transform);
-                card.transform.position = topPlayerDrawCards.transform.position;
+                var card = leftGroundCardHolderTransform.GetChild(i).gameObject;
+                card.GetComponent<Card>().SlideToMiddle(leftDrawDeck.transform);
             }
-            else
+
+            for (int i = rightGroundCount - 1; i >= 0; i--)
             {
-                card.transform.SetParent(bottomPlayerDrawCards.transform);
-                card.transform.position = bottomPlayerDrawCards.transform.position;
+                var card = rightGroundCardHolderTransform.GetChild(i).gameObject;
+                card.GetComponent<Card>().SlideToMiddle(rightDrawDeck.transform);
             }
-        }
-    }
 
-    private GameObject CreateCard(Card drawedCard)
-    {
-        var card = Instantiate(cardPrefab);
-        card.GetComponent<RectTransform>().localScale = CardScaler();
-        card.AddComponent<Card>();
-        card.name = drawedCard.CardName;
-        card.GetComponent<Image>().sprite = Resources.Load<Sprite>($"Cards/{card.name}");
-        card.GetComponent<Card>().ID = drawedCard.ID;
-        card.GetComponent<Card>().CardName = drawedCard.CardName;
-        card.GetComponent<Card>().Suit = drawedCard.Suit;
-        card.GetComponent<Card>().Value = drawedCard.Value;
-        return card;
-    }
-
-    public void DrawCard(Player player, int count)
-    {
-        if (!player.HasCards)
-        {
-            Gameover(player);
-        }
-        else if (player.HandCards.Count < 4 && player.Deck.Count != 0)
-        {
-            if (player.Deck.Count < count)
-                count = player.Deck.Count;
-
-            var cards = new List<GameObject>();
-            for (int i = 0; i < count; i++)
+            do
             {
-                var card = player.Deck.Last();
-                player.RemoveCardFromDeck(player.Deck.Last());
-                player.AddCardToHand(card);
-                card.GetComponent<Card>().Player = player;
-                cards.Add(card);
-            }
+                yield return new WaitForEndOfFrame();
+            } while (rightDrawDeck.transform.GetChild(0).GetComponent<Card>().isSliding ||
+                     leftDrawDeck.transform.GetChild(0).GetComponent<Card>().isSliding);
 
-            StartCoroutine(AnimationController.SlideToHand(cards, player));
+            DealMiddleCards();
         }
-    }
 
 
-
-    public bool CheckIfSpeedIsValid()
-    {
-        var leftCard_go = leftGroundCardHolder.transform.GetChild(leftGroundCardHolder.transform.childCount - 1).transform;
-        var leftCard = leftCard_go.GetComponent<Card>();
-        int leftCardValue = leftCard.Value;
-
-        var rightCard_go = rightGroundCardHolder.transform.GetChild(rightGroundCardHolder.transform.childCount - 1).transform;
-        var rightCard = rightCard_go.GetComponent<Card>();
-        int rightCardValue = rightCard.Value;
-
-        if (IsThisNewSpeed(leftCard, rightCard))
+        private GameObject CreateCardObject(Card cardConfig, bool withButton = true)
         {
-            if (leftCardValue == rightCardValue)
-                return true;
+            var card = Instantiate(cardPrefab);
+            card.GetComponent<RectTransform>().localScale = GetScale();
+            card.GetComponent<Image>().sprite = Resources.Load<Sprite>($"Cards/{cardConfig.cardName}");
+
+            var cardComponent = card.AddComponent<Card>();
+            card.name = cardConfig.cardName;
+            cardComponent.id = cardConfig.id;
+            cardComponent.cardName = cardConfig.cardName;
+            cardComponent.suit = cardConfig.suit;
+            cardComponent.value = cardConfig.value;
+            cardComponent.SetGameControl(this);
+
+            if (!withButton) return card;
+
+            var button = card.AddComponent<Button>();
+            button.onClick.AddListener(delegate { cardComponent.CardClick(); });
+
+            return card;
         }
-        return false;
-    }
 
-    private bool IsThisNewSpeed(Card leftCard, Card rightCard)
-    {
-        if (lastSpeed.Count == 2)
+
+        public bool CheckIfSpeedIsValid()
         {
-            var oldSpeedLeftCard = lastSpeed[0];
-            var oldSpeedRightCard = lastSpeed[1];
+            var leftCardObject = leftGroundCardHolder.transform.GetChild(leftGroundCardHolder.transform.childCount - 1)
+                .transform;
+            var leftCard = leftCardObject.GetComponent<Card>();
+            int leftCardValue = leftCard.value;
 
-            if (Card.IsEqual(leftCard, oldSpeedLeftCard) && Card.IsEqual(rightCard, oldSpeedRightCard))
+            var rightCardObject = rightGroundCardHolder.transform
+                .GetChild(rightGroundCardHolder.transform.childCount - 1)
+                .transform;
+            var rightCard = rightCardObject.GetComponent<Card>();
+            int rightCardValue = rightCard.value;
+
+            if (!IsSpeedUnique(leftCard, rightCard)) return false;
+            return leftCardValue == rightCardValue;
+        }
+
+        private bool IsSpeedUnique(Card leftCard, Card rightCard)
+        {
+            if (lastSpeed.Equals(new KeyValuePair<Card, Card>())) return true;
+
+            var oldSpeedLeftCard = lastSpeed.Key;
+            var oldSpeedRightCard = lastSpeed.Value;
+
+            if (leftCard.Equals(oldSpeedLeftCard) && rightCard.Equals(oldSpeedRightCard))
                 return false;
+
+            return true;
         }
-        return true;
-    }
 
-    public void SpeedCooldown(Player player)
-    {
-        player.Cooldown(GameSettings.cooldownTime);
-    }
-
-    public void SpeedEvent(Player fromThisPlayer, Player toThisPlayer)
-    {
-        UpdateLastSpeed();
-
-        fromThisPlayer.GiveCards(fromThisPlayer, toThisPlayer);
-    }
-
-    private void UpdateLastSpeed()
-    {
-        lastSpeed.Clear();
-
-        if (rightGroundCardHolder.transform.childCount > 0 && leftGroundCardHolder.transform.childCount > 0)
+        public void SpeedCooldown(Player player)
         {
-            lastSpeed.Add(leftGroundCardHolder.transform.GetChild(leftGroundCardHolder.transform.childCount - 1).transform.GetComponent<Card>());
-            lastSpeed.Add(rightGroundCardHolder.transform.GetChild(rightGroundCardHolder.transform.childCount - 1).transform.GetComponent<Card>());
+            player.Cooldown(CooldownTime);
         }
-    }
-    private void Gameover(Player winner)
-    {
-        isGameOver = true;
-        winner.Score++;
-        string key = $"{winner.PlaySide}PlayerScore";
-        PlayerPrefs.SetInt(key, winner.Score);
 
-    }
-
-    public GameObject GetTargetCard(GameObject cardObject)
-    {
-        var card = cardObject.GetComponent<Card>();
-
-        var leftCard = leftGroundCardHolder.transform.GetChild(leftGroundCardHolder.transform.childCount - 1).GetComponent<Card>();
-        var rightCard = rightGroundCardHolder.transform.GetChild(rightGroundCardHolder.transform.childCount - 1).GetComponent<Card>();
-        GameObject target = null;
-
-        if (IsCardMatching(card, leftCard))
-            target = leftGroundCardHolder;
-        else if (IsCardMatching(card, rightCard))
-            target = rightGroundCardHolder;
-
-        if (target != null)
+        public void SpeedEvent(Player fromThisPlayer, Player toThisPlayer)
         {
-            twoMan.ResetKeys();
+            UpdateLastSpeed();
+            fromThisPlayer.GiveCards(toThisPlayer);
         }
 
-        return target;
+        private void UpdateLastSpeed()
+        {
+            var rightGroundCardHolderTransform = rightGroundCardHolder.transform;
+            var leftGroundCardHolderTransform = leftGroundCardHolder.transform;
+            var leftGroundChildCount = leftGroundCardHolderTransform.childCount;
+            var rightGroundChildCount = rightGroundCardHolderTransform.childCount;
+
+            if (rightGroundChildCount <= 0 || leftGroundChildCount <= 0)
+                return;
+
+            var leftCard = leftGroundCardHolderTransform.GetChild(leftGroundChildCount - 1)
+                .transform.GetComponent<Card>();
+            var rightCard = rightGroundCardHolderTransform.GetChild(rightGroundChildCount - 1)
+                .transform.GetComponent<Card>();
+
+            lastSpeed = new KeyValuePair<Card, Card>(leftCard, rightCard);
+        }
+
+        public IEnumerator GameOver(Player winner)
+        {
+            isGameOver = true;
+            IncreaseScore(winner);
+
+            yield return new WaitForSeconds(1);
+
+            uiInteractions.UpdateWinnerText(winner.playSide);
+            uiInteractions.UpdateScores();
+            gameOverPanel.SetActive(true);
+            gamePanel.SetActive(false);
+        }
+
+        private static void IncreaseScore(Player winner)
+        {
+            string key = $"{winner.playSide}PlayerScore";
+            int score = PlayerPrefs.GetInt(key);
+            score++;
+            PlayerPrefs.SetInt(key, score);
+        }
+
+        public GameObject GetTargetMiddleHolder(GameObject cardObject)
+        {
+            var card = cardObject.GetComponent<Card>();
+
+            var leftCard = leftGroundCardHolder.transform.GetChild(leftGroundCardHolder.transform.childCount - 1)
+                .GetComponent<Card>();
+            var rightCard = rightGroundCardHolder.transform.GetChild(rightGroundCardHolder.transform.childCount - 1)
+                .GetComponent<Card>();
+
+            GameObject target = null;
+
+            if (IsCardMatching(card, leftCard))
+                target = leftGroundCardHolder;
+            else if (IsCardMatching(card, rightCard))
+                target = rightGroundCardHolder;
+
+            if (target != null)
+            {
+                twoPlayerKey.ResetKeys();
+            }
+
+            return target;
+        }
+
+        private bool IsCardMatching(Card children, Card parent)
+        {
+            bool isChildrenAce = children.value == 1;
+            bool isChildrenK = children.value == 13;
+
+            bool isParentAce = parent.value == 1;
+            bool isParentK = parent.value == 13;
+
+            if (isChildrenAce && isParentK)
+                return true;
+
+            if (isChildrenK && isParentAce)
+                return true;
+
+            if (children.value == parent.value - 1)
+                return true;
+
+            if (children.value == parent.value + 1)
+                return true;
+
+            return false;
+        }
     }
-
-    public bool IsCardMatching(Card card, Card holder)
-    {
-        bool isAisAce = card.Value == 1;
-        bool isAisK = card.Value == 13;
-
-        bool isBisAce = holder.Value == 1;
-        bool isBisK = holder.Value == 13;
-
-        if (isAisAce && isBisK)
-            return true;
-
-        if (isAisK && isBisAce)
-            return true;
-
-        if (card.Value == holder.Value - 1)
-            return true;
-
-        if (card.Value == holder.Value + 1)
-            return true;
-
-        return false;
-    }
-
 }

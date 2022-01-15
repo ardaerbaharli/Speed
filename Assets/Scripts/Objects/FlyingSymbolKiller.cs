@@ -1,9 +1,12 @@
 ﻿using UnityEngine;
 
-public class FlyingSymbolKiller : MonoBehaviour
+namespace Objects
 {
-    void OnTriggerEnter2D(Collider2D col)
+    public class FlyingSymbolKiller : MonoBehaviour
     {
-        Destroy(col.gameObject);
+        void OnTriggerEnter2D(Collider2D col)
+        {
+            Destroy(col.gameObject);
+        }
     }
 }

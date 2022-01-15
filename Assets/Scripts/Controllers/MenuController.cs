@@ -1,28 +1,32 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-public class MenuController : MonoBehaviour
+namespace Controllers
 {
-    [SerializeField] private GameObject bottomScore;
-    [SerializeField] private GameObject topScore;
-    void Start()
+    public class MenuController : MonoBehaviour
     {
-        bottomScore.transform.GetChild(1).GetComponent<Text>().text = PlayerPrefs.GetInt("BottomPlayerScore", 0).ToString();
-        topScore.transform.GetChild(1).GetComponent<Text>().text = PlayerPrefs.GetInt("TopPlayerScore", 0).ToString();
-    }
+        [SerializeField] private Text bottomScore;
+        [SerializeField] private Text topScore;
+
+        void Start()
+        {
+            bottomScore.text = PlayerPrefs.GetInt("BottomPlayerScore", 0).ToString();
+            topScore.text = PlayerPrefs.GetInt("TopPlayerScore", 0).ToString();
+        }
 
 
-    public void StartGame()
-    {
-        SceneController.LoadGameScreen();
-    }
+        public void StartGame()
+        {
+            SceneController.instance.LoadGameScreen();
+        }
 
-    public void ResetScores()
-    {
-        PlayerPrefs.SetInt("TopPlayerScore", 0);
-        PlayerPrefs.SetInt("BottomPlayerScore", 0);
+        public void ResetScores()
+        {
+            PlayerPrefs.SetInt("TopPlayerScore", 0);
+            PlayerPrefs.SetInt("BottomPlayerScore", 0);
 
-        bottomScore.transform.GetChild(1).GetComponent<Text>().text = PlayerPrefs.GetInt("BottomPlayerScore", 0).ToString();
-        topScore.transform.GetChild(1).GetComponent<Text>().text = PlayerPrefs.GetInt("TopPlayerScore", 0).ToString();
+            bottomScore.text = PlayerPrefs.GetInt("BottomPlayerScore", 0).ToString();
+            topScore.text = PlayerPrefs.GetInt("TopPlayerScore", 0).ToString();
+        }
     }
 }

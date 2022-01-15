@@ -1,33 +1,22 @@
-﻿using System.Collections;
+﻿using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
-using DG.Tweening;
 
-public class PopupController : MonoBehaviour
+namespace Controllers
 {
-    [SerializeField] private GameObject background;
-    [SerializeField] private GameObject tinyBackground;
-
-    private float fadeTime = 0.5f;
-
-    private void Start()
+    public class PopupController : MonoBehaviour
     {
-        int index = Random.Range(0, 7);
-        tinyBackground.GetComponent<Image>().sprite = Resources.Load<Sprite>($"Backgrounds/BG{index}");
+        [SerializeField] private Image background;
+        [SerializeField] private Image tinyBackground;
 
-        background.GetComponent<Image>().DOFade(0.4f, fadeTime);
-    }
+        private readonly float fadeTime = 0.5f;
 
-    public void ResumeButton()
-    {
-        Time.timeScale = 1;
-        background.GetComponent<Image>().DOFade(0.1f, fadeTime);
-        tinyBackground.SetActive(false);
-        Destroy(gameObject, fadeTime);
-    }
+        private void OnEnable()
+        {
+            int index = Random.Range(0, 7);
+            tinyBackground.sprite = Resources.Load<Sprite>($"Backgrounds/BG{index}");
 
-    public void RestartButton()
-    {
-        SceneController.LoadGameScreen();
+            background.DOFade(0.4f, fadeTime);
+        }
     }
 }

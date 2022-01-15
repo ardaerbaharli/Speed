@@ -1,111 +1,217 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
+using Controllers;
 using UnityEngine;
+using UnityEngine.UI;
 
-public class Player : MonoBehaviour
+namespace Objects
 {
-    public PlaySide PlaySide { get; set; }
-    public bool IsInCooldown { get; set; }
-    public float CooldownTime { get; set; }
-    public bool DrawMiddle { get; set; }
-    public int Score { get; set; }
-    public bool HasCards { get { return _HasCards(); } }
-    public List<GameObject> HandCards { get; private set; }
-    public List<GameObject> Deck { get; private set; }
-    private void Awake()
+    public class Player : MonoBehaviour
     {
-        HandCards = new List<GameObject>();
-        Deck = new List<GameObject>();
-    }
+        [SerializeField] private int remainingCardCount;
+        [SerializeField] private List<GameObject> handCards;
+        [SerializeField] private List<GameObject> deck;
 
-    public void AddCardToHand(GameObject card)
-    {
-        HandCards.Add(card);
-    }
-    public void AddCardsToHand(List<GameObject> cards)
-    {       
-        cards.ForEach(x => HandCards.Add(x));
-    }
+        public PlaySide playSide;
+        public bool isInCooldown;
+        public float cooldownTime;
+        public bool pressedDrawButton;
 
-    public void RemoveCardFromHand(GameObject card)
-    {
-        HandCards.Remove(card);
-    }
-    public void RemoveCardsFromHand(List<GameObject> cards)
-    {
-        cards.ForEach(x => HandCards.Remove(x));
-    }
+        private const float DealSlideTime = 0.1f;
+        private GameObject numberOfCardsText;
+        private float leftBorderX, rightBorderX;
+        private Vector3 cardArea;
+        private Vector2 anchor;
+        private GameControl gameControl;
+        private Transform hand;
 
-    public void AddCardToDeck(GameObject card)
-    {
-        Deck.Add(card);
-    }
-    public void AddCardsToDeck(List<GameObject> cards)
-    {
-        cards.ForEach(x => Deck.Add(x));
+        public bool HasCards => _HasCards();
+        public void SetHand(Transform h) => hand = h;
+        public void SetGameControl(GameControl gc) => gameControl = gc;
+        public void SetNumberOfCardsText(GameObject numberOfCardsText) => this.numberOfCardsText = numberOfCardsText;
 
-    }
-
-    public void RemoveCardFromDeck(GameObject card)
-    {
-        Deck.Remove(card);
-    }
-    public void RemoveCardsFromDeck(List<GameObject> cards)
-    {        
-        cards.ForEach(x => Deck.Remove(x));
-    }
-
-
-
-    private void Update()
-    {
-        if (IsInCooldown)
+        private void Awake()
         {
-            if (CooldownTime > 0)
-                CooldownTime -= Time.deltaTime;
-            else
-                IsInCooldown = false;
+            numberOfCardsText = GameObject.Find("RemainingCardCount" + playSide);
+
+            handCards = new List<GameObject>();
+            deck = new List<GameObject>();
+            leftBorderX = 0f;
+            rightBorderX = Screen.width;
+            cardArea = Vector3.zero;
+            anchor = new Vector2(0.5f, 0.5f);
         }
-    }
 
-    public void Cooldown(float time)
-    {
-        IsInCooldown = true;
-        CooldownTime = time;
-    }
-    private bool _HasCards()
-    {
-        if (Deck.Count > 0)
-            return true;
-        else if (HandCards.Count > 0)
-            return true;
-        else return false;
-    }
-    public void GiveCards(Player fromThisPlayer, Player toThisPlayer)
-    {
-        if (fromThisPlayer.HandCards.Count > 0)
+        private void AddCardToHand(GameObject card)
         {
-            var cards = fromThisPlayer.HandCards;
-            StartCoroutine(AnimationController.SlideToHand(cards, toThisPlayer));
+            handCards.Add(card);
+        }
 
-            foreach (var card in fromThisPlayer.HandCards.ToList())
+        public void RemoveCardFromHand(GameObject card)
+        {
+            handCards.Remove(card);
+        }
+
+        public void AddCardToDeck(GameObject card)
+        {
+            card.GetComponent<Card>().player = this;
+            deck.Add(card);
+        }
+
+        private void RemoveCardFromDeck(GameObject card)
+        {
+            deck.Remove(card);
+        }
+
+        private void UpdateRemainingCardCountText()
+        {
+            numberOfCardsText.GetComponent<Text>().text = remainingCardCount.ToString();
+        }
+
+        private void Update()
+        {
+            if (gameControl.isGameOver) return;
+
+            if (isInCooldown)
             {
-                card.GetComponent<Card>().Player = toThisPlayer;
-                //toThisPlayer.HandCards.Add(card);
-                toThisPlayer.AddCardToHand(card);
-                //fromThisPlayer.HandCards.Remove(card);
-                fromThisPlayer.RemoveCardFromHand(card);
+                if (cooldownTime > 0)
+                    cooldownTime -= Time.deltaTime;
+                else
+                    isInCooldown = false;
             }
-            GameControl.instance.DrawCard(fromThisPlayer, 4);
-        }
-    }
 
-    public void TakeCards(List<GameObject> cards)
-    {
-        //foreach (var card in cards)
-        //{
-        //    HandCards.Add(card);
-        //}
-        AddCardsToHand(cards);
+            remainingCardCount = handCards.Count + deck.Count;
+            UpdateRemainingCardCountText();
+        }
+
+        public void Cooldown(float time)
+        {
+            isInCooldown = true;
+            cooldownTime = time;
+        }
+
+        private bool _HasCards()
+        {
+            return deck.Count > 0 || handCards.Count > 0;
+        }
+
+        public void GiveCards(Player toThisPlayer)
+        {
+            if (handCards.Count <= 0) return;
+
+            foreach (var card in handCards.ToList())
+            {
+                var cardComponent = card.GetComponent<Card>();
+                cardComponent.player = toThisPlayer;
+                cardComponent.AdjustRotation();
+                RemoveCardFromHand(card);
+                toThisPlayer.AddCardToHand(card);
+                toThisPlayer.SlideCardToPlayerHand(card);
+            }
+
+            DrawCard(4);
+        }
+
+
+        public void SlideCardsToPlayerHand(List<GameObject> cardObjects)
+        {
+            foreach (var card in cardObjects)
+            {
+                var cardCanvas = card.GetComponent<Canvas>();
+                cardCanvas.overrideSorting = true;
+                cardCanvas.sortingOrder = -1;
+                card.transform.SetParent(hand);
+
+                var cardRectTransform = card.GetComponent<RectTransform>();
+                cardRectTransform.anchorMin = anchor;
+                cardRectTransform.anchorMax = anchor;
+            }
+
+            AlignCards();
+        }
+
+        public void SlideCardToPlayerHand(GameObject card)
+        {
+            var cardCanvas = card.GetComponent<Canvas>();
+            cardCanvas.overrideSorting = true;
+            cardCanvas.sortingOrder = -1;
+            card.transform.SetParent(hand);
+
+            var cardRectTransform = card.GetComponent<RectTransform>();
+            cardRectTransform.anchorMin = anchor;
+            cardRectTransform.anchorMax = anchor;
+
+            AlignCards();
+        }
+
+
+        public void AlignCards()
+        {
+            StartCoroutine(AlignCardsCoroutine());
+        }
+
+        public IEnumerator AlignCardsCoroutine()
+        {
+            if (hand.childCount <= 0) yield break;
+
+            var handTransform = hand.transform;
+
+            if (cardArea == Vector3.zero)
+                cardArea = new Vector3(handTransform.GetChild(0).GetComponent<RectTransform>().rect.width, 0, 0);
+
+            int cardCount = handTransform.childCount;
+            var handTransformPosition = handTransform.position;
+            var leftBorderPos = new Vector3(leftBorderX, handTransformPosition.y, 0) + cardArea / 4;
+            var rightBorderPos = new Vector3(rightBorderX, handTransformPosition.y, 0) - cardArea / 4;
+            var handArea = rightBorderPos - leftBorderPos;
+
+            var distanceBetweenCards = handArea / (cardCount + 1);
+
+            var pos = leftBorderPos;
+            for (int i = 0; i < cardCount; i++)
+            {
+                if (handTransform.childCount < cardCount)
+                    break;
+
+                pos += distanceBetweenCards;
+                var card = handTransform.GetChild(i);
+                float seconds = DealSlideTime;
+                float t = 0f;
+                while (t <= 1.0)
+                {
+                    t += Time.deltaTime / seconds;
+                    card.transform.position =
+                        Vector3.Lerp(card.transform.position, pos, Mathf.SmoothStep(0f, 1f, t));
+                    yield return null;
+                }
+
+                card.GetComponent<Canvas>().overrideSorting = false;
+                yield return null;
+            }
+        }
+
+        public void DrawCard(int numberOfCards)
+        {
+            if (!HasCards)
+            {
+                StartCoroutine(gameControl.GameOver(this));
+            }
+            else if (handCards.Count < 4 && deck.Count != 0)
+            {
+                if (deck.Count < numberOfCards)
+                    numberOfCards = deck.Count;
+
+                for (int i = 0; i < numberOfCards; i++)
+                {
+                    var card = deck.Last();
+                    if (playSide == PlaySide.Top)
+                        card.GetComponent<Card>().AdjustRotation();
+                    RemoveCardFromDeck(deck.Last());
+                    AddCardToHand(card);
+                    SlideCardToPlayerHand(card);
+                }
+            }
+        }
     }
 }

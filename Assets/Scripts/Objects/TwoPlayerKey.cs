@@ -1,50 +1,48 @@
 ﻿using UnityEngine;
-public class TwoPlayerKey : MonoBehaviour
+
+namespace Objects
 {
-    private Player _p1;
-    private Player _p2;
-
-    public TwoPlayerKey(Player p1 = null, Player p2 = null)
+    public class TwoPlayerKey : MonoBehaviour
     {
-        if (p1 is null)
-            return;
+        private Player player1;
+        private Player player2;
 
-        if (p2 is null)
-            return;
+        public TwoPlayerKey(Player player1 = null, Player player2 = null)
+        {
+            if (player1 is null)
+                return;
 
-        _p1 = p1;
-        _p2 = p2;
+            if (player2 is null)
+                return;
+
+            this.player1 = player1;
+            this.player2 = player2;
+        }
+
+        public void SetPlayers(Player p1, Player p2)
+        {
+            if (p1 is null) return;
+
+            if (p2 is null) return;
+
+            player1 = p1;
+            player2 = p2;
+        }
+
+        public bool IsBothPlayersAccepted()
+        {
+            return player1.pressedDrawButton && player2.pressedDrawButton;
+        }
+
+        public void SetTrue(Player player)
+        {
+            player.pressedDrawButton = true;
+        }
+
+        public void ResetKeys()
+        {
+            player1.pressedDrawButton = false;
+            player2.pressedDrawButton = false;
+        }
     }
-
-    public TwoPlayerKey SetPlayers(Player p1 , Player p2 )
-    {
-        if (p1 is null)
-            return null;
-
-        if (p2 is null)
-            return null;
-
-        _p1 = p1;
-        _p2 = p2;
-        return this;
-    }
-
-    public bool IsBothPlayersAccepted()
-    {
-        if (_p1.DrawMiddle && _p2.DrawMiddle)
-            return true;
-        return false;
-    }
-
-    public void SetTrue(Player player)
-    {
-        player.DrawMiddle = true;
-    }
-
-    public void ResetKeys()
-    {
-        _p1.DrawMiddle = false;
-        _p2.DrawMiddle = false;
-    }
-
 }
