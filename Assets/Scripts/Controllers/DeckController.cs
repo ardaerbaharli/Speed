@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
-using Objects;
+using Speed.Objects;
 using UnityEngine;
 
-namespace Controllers
+namespace Speed.Controllers
 {
     public class DeckController : MonoBehaviour
     {

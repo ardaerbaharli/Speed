@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using Objects;
+using Speed.Objects;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Controllers
+namespace Speed.Controllers
 {
     public enum PlaySide
     {

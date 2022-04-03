@@ -3,12 +3,12 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-namespace Objects
+namespace Speed.Objects
 {
     public class ToggleSwitch : MonoBehaviour, IPointerDownHandler
     {
-        [SerializeField] private bool _isOff = false;
-        public bool isOff { get { return _isOff; } }
+        [SerializeField] private bool isOff;
+        public bool IsOff => isOff;
 
         [SerializeField] private RectTransform toggleIndicator;
         [SerializeField] private Image background;
@@ -27,21 +27,21 @@ namespace Objects
         {
             onX = toggleIndicator.anchoredPosition.x;
             offX = onX - toggleIndicator.rect.width;
-            background.color = isOff ? offColor : onColor;
-            Debug.Log(isOff);
-            Toggle(isOff);
+            background.color = IsOff ? offColor : onColor;
+            Debug.Log(IsOff);
+            Toggle(IsOff);
         }
 
         private void Toggle(bool value)
         {
-            if (value != isOff)
+            if (value != IsOff)
             {
-                _isOff = value;
-                ToggleColor(isOff);
-                MoveIndicator(isOff);
+                isOff = value;
+                ToggleColor(IsOff);
+                MoveIndicator(IsOff);
 
                 if (valueChanged != null)
-                    valueChanged(isOff);
+                    valueChanged(IsOff);
             }
         }
 
@@ -63,7 +63,7 @@ namespace Objects
 
         public void OnPointerDown(PointerEventData eventData)
         {
-            Toggle(!isOff);
+            Toggle(!IsOff);
         }
     }
 }

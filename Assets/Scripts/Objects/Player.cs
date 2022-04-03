@@ -1,11 +1,11 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Controllers;
+using Speed.Controllers;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Objects
+namespace Speed.Objects
 {
     public class Player : MonoBehaviour
     {

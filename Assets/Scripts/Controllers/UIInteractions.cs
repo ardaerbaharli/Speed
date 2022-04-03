@@ -1,9 +1,9 @@
-﻿using Objects;
+﻿using Speed.Objects;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-namespace Controllers
+namespace Speed.Controllers
 {
     public class UIInteractions : MonoBehaviour
     {
@@ -66,12 +66,13 @@ namespace Controllers
         public void ResumeButton()
         {
             Time.timeScale = 1;
-            pauseMenu.SetActive(false);
+            pauseMenu.GetComponent<PopupController>().Deactivate();
         }
 
         public void RestartButton()
         {
             SceneController.instance.LoadGameScreen();
+            Time.timeScale = 1;
         }
 
         public void MenuButton()

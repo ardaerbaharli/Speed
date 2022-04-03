@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace Controllers
+namespace Speed.Controllers
 {
     public class SceneController : MonoBehaviour
     {

@@ -11,7 +11,6 @@ namespace Controllers
 
         void Start()
         {
-            SetBackground();
             interval = RandomInterval();
         }
 
@@ -36,10 +35,6 @@ namespace Controllers
             return Random.Range(200, 250);
         }
 
-        private void SetBackground()
-        {
-            int index = Random.Range(0, 7);
-            gameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>($"Backgrounds/BG{index}");
-        }
+      
     }
 }

@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections;
-using Controllers;
+﻿using System.Collections;
+using Speed.Controllers;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Objects
+namespace Speed.Objects
 {
     public class Card : MonoBehaviour
     {

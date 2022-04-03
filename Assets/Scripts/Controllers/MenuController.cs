@@ -1,10 +1,13 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 using UnityEngine.UI;
 
-namespace Controllers
+namespace Speed.Controllers
 {
     public class MenuController : MonoBehaviour
     {
+        [SerializeField] private GameObject scorePanel;
+
         [SerializeField] private Text bottomScore;
         [SerializeField] private Text topScore;
 
@@ -20,6 +23,12 @@ namespace Controllers
             SceneController.instance.LoadGameScreen();
         }
 
+        public void ShowScores()
+        {
+            scorePanel.SetActive(true);
+        }
+
+
         public void ResetScores()
         {
             PlayerPrefs.SetInt("TopPlayerScore", 0);
@@ -27,6 +36,13 @@ namespace Controllers
 
             bottomScore.text = PlayerPrefs.GetInt("BottomPlayerScore", 0).ToString();
             topScore.text = PlayerPrefs.GetInt("TopPlayerScore", 0).ToString();
+            StartCoroutine(HideScorePanel());
+        }
+
+        private IEnumerator HideScorePanel()
+        {
+            yield return new WaitForSeconds(0.3f);
+            scorePanel.SetActive(false);
         }
     }
 }

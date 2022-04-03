@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Objects
+namespace Speed.Objects
 {
     public class TwoPlayerKey : MonoBehaviour
     {

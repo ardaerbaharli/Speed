@@ -13,7 +13,7 @@ namespace Controllers
             var gameObj = gameObject;
             gameObj.GetComponent<Image>().sprite = background.GetComponent<Image>().sprite;
             // StartCoroutine(FadeIn());
-            iTween.FadeTo(gameObj, 0, 2f);
+            // iTween.FadeTo(gameObj, 0, 2f);
         }
     }
 }
